@@ -1,4 +1,5 @@
 import org.threejs as three
+from  org.threejs.line import make_line
 import math
 
 print("hi")
@@ -48,6 +49,8 @@ def init():
     )
     scene.add(lathe)
     print(lg)
+    line = make_line(0x0000ff, (-10,0,0), (0,10,0), (10,0,0))
+
     document.getElementById("XX").appendChild(renderer.domElement)
 
 
