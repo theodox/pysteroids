@@ -1,10 +1,8 @@
-from org.threejs import Geometry, LineBasicMaterial, Line, Vector3
+import org.threejs as three
 
-
-
-def make_line(color, *points ):
-    geo = Geometry()
+def make_line(color, *points):
+    geo = three.Geometry()
     for p in points:
-        geo.vertices.push(Vector3(p))
-    mtl = LineBasicMaterial({'color': color})
-    return Line(geo, mtl)
+        geo.vertices.push(three.Vector3(*p))
+    mtl = three.LineBasicMaterial({'color': color})
+    return three.Line(geo, mtl)

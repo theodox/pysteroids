@@ -1,5 +1,5 @@
 "use strict";
-// Transcrypt'ed from Python, 2017-05-12 23:15:29
+// Transcrypt'ed from Python, 2017-05-21 14:24:20
 function ball () {
    var __symbols__ = ['__py3.6__', '__esv6__'];
     var __all__ = {};
@@ -2377,96 +2377,6 @@ function ball () {
 
 	__nest__ (
 		__all__,
-		'math', {
-			__all__: {
-				__inited__: false,
-				__init__: function (__all__) {
-					var pi = Math.PI;
-					var e = Math.E;
-					var exp = Math.exp;
-					var expm1 = function (x) {
-						return Math.exp (x) - 1;
-					};
-					var log = function (x, base) {
-						return (base === undefined ? Math.log (x) : Math.log (x) / Math.log (base));
-					};
-					var log1p = function (x) {
-						return Math.log (x + 1);
-					};
-					var log2 = function (x) {
-						return Math.log (x) / Math.LN2;
-					};
-					var log10 = function (x) {
-						return Math.log (x) / Math.LN10;
-					};
-					var pow = Math.pow;
-					var sqrt = Math.sqrt;
-					var sin = Math.sin;
-					var cos = Math.cos;
-					var tan = Math.tan;
-					var asin = Math.asin;
-					var acos = Math.acos;
-					var atan = Math.atan;
-					var atan2 = Math.atan2;
-					var hypot = Math.hypot;
-					var degrees = function (x) {
-						return (x * 180) / Math.PI;
-					};
-					var radians = function (x) {
-						return (x * Math.PI) / 180;
-					};
-					var sinh = Math.sinh;
-					var cosh = Math.cosh;
-					var tanh = Math.tanh;
-					var asinh = Math.asinh;
-					var acosh = Math.acosh;
-					var atanh = Math.atanh;
-					var floor = Math.floor;
-					var ceil = Math.ceil;
-					var trunc = Math.trunc;
-					var isnan = isNaN;
-					var inf = Infinity;
-					var nan = NaN;
-					__pragma__ ('<all>')
-						__all__.acos = acos;
-						__all__.acosh = acosh;
-						__all__.asin = asin;
-						__all__.asinh = asinh;
-						__all__.atan = atan;
-						__all__.atan2 = atan2;
-						__all__.atanh = atanh;
-						__all__.ceil = ceil;
-						__all__.cos = cos;
-						__all__.cosh = cosh;
-						__all__.degrees = degrees;
-						__all__.e = e;
-						__all__.exp = exp;
-						__all__.expm1 = expm1;
-						__all__.floor = floor;
-						__all__.hypot = hypot;
-						__all__.inf = inf;
-						__all__.isnan = isnan;
-						__all__.log = log;
-						__all__.log10 = log10;
-						__all__.log1p = log1p;
-						__all__.log2 = log2;
-						__all__.nan = nan;
-						__all__.pi = pi;
-						__all__.pow = pow;
-						__all__.radians = radians;
-						__all__.sin = sin;
-						__all__.sinh = sinh;
-						__all__.sqrt = sqrt;
-						__all__.tan = tan;
-						__all__.tanh = tanh;
-						__all__.trunc = trunc;
-					__pragma__ ('</all>')
-				}
-			}
-		}
-	);
-	__nest__ (
-		__all__,
 		'org.threejs', {
 			__all__: {
 				__inited__: false,
@@ -2592,9 +2502,7 @@ function ball () {
 					var Box2 = _ctor (api.Box2);
 					var Line3 = _ctor (api.Line3);
 					var Euler = _ctor (api.Euler);
-					var Vector4 = _ctor (api.Vector4);
 					var Vector3 = _ctor (api.Vector3);
-					var Vector2 = _ctor (api.Vector2);
 					var Quaternion = _ctor (api.Quaternion);
 					var Color = _ctor (api.Color);
 					var MorphBlendMesh = _ctor (api.MorphBlendMesh);
@@ -3221,9 +3129,7 @@ function ball () {
 						__all__.UnsignedShort5551Type = UnsignedShort5551Type;
 						__all__.UnsignedShort565Type = UnsignedShort565Type;
 						__all__.UnsignedShortType = UnsignedShortType;
-						__all__.Vector2 = Vector2;
 						__all__.Vector3 = Vector3;
-						__all__.Vector4 = Vector4;
 						__all__.VectorKeyframeTrack = VectorKeyframeTrack;
 						__all__.Vertex = Vertex;
 						__all__.VertexColors = VertexColors;
@@ -3247,17 +3153,170 @@ function ball () {
 			}
 		}
 	);
+	__nest__ (
+		__all__,
+		'random', {
+			__all__: {
+				__inited__: false,
+				__init__: function (__all__) {
+					var _array = function () {
+						var __accu0__ = [];
+						for (var i = 0; i < 624; i++) {
+							__accu0__.append (0);
+						}
+						return __accu0__;
+					} ();
+					var _index = 0;
+					var _bitmask1 = Math.pow (2, 32) - 1;
+					var _bitmask2 = Math.pow (2, 31);
+					var _bitmask3 = Math.pow (2, 31) - 1;
+					var _fill_array = function () {
+						for (var i = 0; i < 624; i++) {
+							var y = (_array [i] & _bitmask2) + (_array [__mod__ (i + 1, 624)] & _bitmask3);
+							_array [i] = _array [__mod__ (i + 397, 624)] ^ y >> 1;
+							if (__mod__ (y, 2) != 0) {
+								_array [i] ^= 2567483615;
+							}
+						}
+					};
+					var _random_integer = function () {
+						if (_index == 0) {
+							_fill_array ();
+						}
+						var y = _array [_index];
+						y ^= y >> 11;
+						y ^= y << 7 & 2636928640;
+						y ^= y << 15 & 4022730752;
+						y ^= y >> 18;
+						_index = __mod__ (_index + 1, 624);
+						return y;
+					};
+					var seed = function (x) {
+						if (typeof x == 'undefined' || (x != null && x .hasOwnProperty ("__kwargtrans__"))) {;
+							var x = int (_bitmask3 * Math.random ());
+						};
+						_array [0] = x;
+						for (var i = 1; i < 624; i++) {
+							_array [i] = (1812433253 * _array [i - 1] ^ (_array [i - 1] >> 30) + i) & _bitmask1;
+						}
+					};
+					var randint = function (a, b) {
+						return a + __mod__ (_random_integer (), (b - a) + 1);
+					};
+					var choice = function (seq) {
+						return seq [randint (0, len (seq) - 1)];
+					};
+					var random = function () {
+						return _random_integer () / _bitmask3;
+					};
+					seed ();
+					__pragma__ ('<all>')
+						__all__._array = _array;
+						__all__._bitmask1 = _bitmask1;
+						__all__._bitmask2 = _bitmask2;
+						__all__._bitmask3 = _bitmask3;
+						__all__._fill_array = _fill_array;
+						__all__._index = _index;
+						__all__._random_integer = _random_integer;
+						__all__.choice = choice;
+						__all__.randint = randint;
+						__all__.random = random;
+						__all__.seed = seed;
+					__pragma__ ('</all>')
+				}
+			}
+		}
+	);
 	(function () {
-		var math = {};
+		var random = {};
 		var three =  __init__ (__world__.org.threejs);
-		__nest__ (math, '', __init__ (__world__.math));
-		print ('hi');
+		__nest__ (random, '', __init__ (__world__.random));
+		var clamp = function (val, low, high) {
+			return max (min (val, high), low);
+		};
+		var sign = function (val) {
+			if (val > 0) {
+				return 1;
+			}
+			if (val < 0) {
+				return -(1);
+			}
+			return 0;
+		};
 		var now = function () {
 			return new Date;
 		};
 		var set_element = function (id, value) {
 			document.getElementById (id).innerHTML = value;
 		};
+		var Keyboard = __class__ ('Keyboard', [object], {
+			get __init__ () {return __get__ (this, function (self) {
+				self.keyboard = dict ({0: false});
+				self.handlers = dict ({});
+			});},
+			get key_down () {return __get__ (this, function (self, key) {
+				self.keyboard [key.key] = true;
+			});},
+			get key_up () {return __get__ (this, function (self, key) {
+				self.keyboard [key.key] = false;
+			});},
+			get py_get () {return __get__ (this, function (self, key) {
+				return self.keyboard.py_get (key, false);
+			});},
+			get get_axis () {return __get__ (this, function (self, key) {
+				return self.handlers [key].value;
+			});},
+			get add_handler () {return __get__ (this, function (self, py_name, handler) {
+				self.handlers [py_name] = handler;
+			});},
+			get py_update () {return __get__ (this, function (self, interval) {
+				for (var [_, eachhandler] of self.handlers.py_items ()) {
+					eachhandler.py_update (self, interval);
+				}
+			});}
+		});
+		var ControlAxis = __class__ ('ControlAxis', [object], {
+			get __init__ () {return __get__ (this, function (self, positive_key, negative_key, attack, decay) {
+				if (typeof attack == 'undefined' || (attack != null && attack .hasOwnProperty ("__kwargtrans__"))) {;
+					var attack = 1;
+				};
+				if (typeof decay == 'undefined' || (decay != null && decay .hasOwnProperty ("__kwargtrans__"))) {;
+					var decay = 0;
+				};
+				if (arguments.length) {
+					var __ilastarg0__ = arguments.length - 1;
+					if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+						var __allkwargs0__ = arguments [__ilastarg0__--];
+						for (var __attrib0__ in __allkwargs0__) {
+							switch (__attrib0__) {
+								case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+								case 'positive_key': var positive_key = __allkwargs0__ [__attrib0__]; break;
+								case 'negative_key': var negative_key = __allkwargs0__ [__attrib0__]; break;
+								case 'attack': var attack = __allkwargs0__ [__attrib0__]; break;
+								case 'decay': var decay = __allkwargs0__ [__attrib0__]; break;
+							}
+						}
+					}
+				}
+				else {
+				}
+				self.positive = positive_key;
+				self.negative = negative_key;
+				self.attack = attack;
+				self.decay = decay;
+				self.value = 0;
+			});},
+			get py_update () {return __get__ (this, function (self, keyboard, interval) {
+				self.value -= (interval * self.decay) * self.value;
+				if (keyboard.py_get (self.positive)) {
+					self.value += interval * self.attack;
+				}
+				if (keyboard.py_get (self.negative)) {
+					self.value -= interval * self.attack;
+				}
+				self.value = clamp (self.value, -(1), 1);
+			});}
+		});
 		var WIDTH = window.innerWidth;
 		var HEIGHT = window.innerHeight;
 		var camera = null;
@@ -3265,111 +3324,86 @@ function ball () {
 		var cube = null;
 		var scene = null;
 		var last_frame = new Date;
+		var kb = Keyboard ();
+		kb.add_handler ('spin', ControlAxis ('s', 'a', __kwargtrans__ ({attack: 1, decay: 0.49})));
+		var RX = 0;
+		var Asteroid = __class__ ('Asteroid', [object], {
+			get __init__ () {return __get__ (this, function (self) {
+				self.geo = three.Mesh (three.SphereGeometry (random.randint (1, 3)), three.MeshNormalMaterial ());
+				self.geo.position.set (random.random () * 10, random.random () * 10, 0);
+				self.momentum = three.Vector3 (random.random () - 0.5, random.random () - 0.5, random.random () - 0.5);
+				self.momentum.multiplyScalar (3);
+			});},
+			get add () {return __get__ (this, function (self, scene) {
+				scene.add (self.geo);
+			});},
+			get py_update () {return __get__ (this, function (self, t) {
+				self.geo.translateOnAxis (self.momentum, t);
+			});}
+		});
+		var asteroids = function () {
+			var __accu0__ = [];
+			for (var a = 0; a < 6; a++) {
+				__accu0__.append (Asteroid ());
+			}
+			return __accu0__;
+		} ();
 		var init = function () {
 			scene = three.Scene ();
-			camera = three.PerspectiveCamera (70, WIDTH / HEIGHT, 1, 10);
-			camera.position.set (0, 3.5, 5);
+			camera = three.PerspectiveCamera (70, WIDTH / HEIGHT, 1, 500);
+			camera.position.set (0, 0, 50);
 			camera.lookAt (scene.position);
 			renderer = three.WebGLRenderer (dict ({'Antialias': true}));
 			renderer.setSize (WIDTH, HEIGHT);
 			cube = three.Mesh (three.BoxGeometry (2, 2, 2), three.MeshNormalMaterial ());
 			scene.add (cube);
-			var points = function () {
-				var __accu0__ = [];
-				for (var i = 0; i < 10; i++) {
-					__accu0__.append (three.Vector2 (math.sin (i * 0.2) * 10 + 5, (i - 5) * 2));
-				}
-				return __accu0__;
-			} ();
-			var lg = three.LatheGeometry (points);
-			var lathe = three.Mesh (lg, three.MeshNormalMaterial (dict ({'color': 16776960})));
-			scene.add (lathe);
-			print (lg);
+			for (var item of asteroids) {
+				item.add (scene);
+			}
 			document.getElementById ('XX').appendChild (renderer.domElement);
+			document.onkeydown = kb.key_down;
+			document.onkeyup = kb.key_up;
 		};
 		var render = function () {
 			requestAnimationFrame (render);
 			var t = (new Date - last_frame) / 1000.0;
+			kb.py_update (t);
 			var SPEED = 4;
-			cube.rotation.x -= SPEED * t;
+			cube.position.y = kb.get_axis ('spin') * 45;
 			cube.rotation.y -= (SPEED * t) * 0.3;
+			for (var item of asteroids) {
+				item.py_update (t);
+			}
 			renderer.render (scene, camera);
 			set_element ('ZZ', t * 1000);
 			last_frame = new Date;
 		};
-		var Game = __class__ ('Game', [object], {
-			window: window,
-			get __init__ () {return __get__ (this, function (self) {
-				self.canvas = null;
-				self.context = null;
-				self.fps = 30;
-				self.start_time = now ();
-				self.last_frame = now ();
-				self.width = 0;
-				self.height = 0;
-				self.x = 17;
-				self.y = 91;
-				self.dx = 100;
-				self.dy = 100;
-				self.hud = null;
-			}, '__init__');},
-			get py_update () {return __get__ (this, function (self) {
-				var current = now ();
-				var elapsed = current - self.last_frame;
-				var cx = self.context;
-				cx.clearRect (0, 0, self.width, self.height);
-				cx.beginPath ();
-				cx.arc (self.x, self.y, 10, 0, Math.PI * 360);
-				cx.fill ();
-				var tmp = elapsed / 1000.0;
-				if (self.x > self.width) {
-					self.dx = -(98);
-				}
-				if (self.x < 1) {
-					self.dx = 102;
-				}
-				if (self.y > self.height) {
-					self.dy = -(97);
-				}
-				if (self.y < 1) {
-					self.dy = 103;
-				}
-				self.x = self.x + self.dx * tmp;
-				self.y = self.y + self.dy * tmp;
-				self.last_frame = current;
-				set_element ('FPS', tmp);
-				set_element ('X', int (self.x));
-				set_element ('Y', int (self.y));
-				window.requestAnimationFrame (self.py_update);
-			}, 'update');},
-			get start () {return __get__ (this, function (self) {
-				self.canvas = document.getElementById ('canvas');
-				self.context = self.canvas.getContext ('2d');
-				self.width = self.canvas.width;
-				self.height = self.canvas.height;
-				document.getElementById ('FPS').innerHTML = 'zzz';
-				self.py_update ();
-			}, 'start');}
-		});
 		init ();
 		render ();
 		__pragma__ ('<use>' +
-			'math' +
 			'org.threejs' +
+			'random' +
 		'</use>')
 		__pragma__ ('<all>')
-			__all__.Game = Game;
+			__all__.Asteroid = Asteroid;
+			__all__.ControlAxis = ControlAxis;
 			__all__.HEIGHT = HEIGHT;
+			__all__.Keyboard = Keyboard;
+			__all__.RX = RX;
 			__all__.WIDTH = WIDTH;
+			__all__.asteroids = asteroids;
 			__all__.camera = camera;
+			__all__.clamp = clamp;
 			__all__.cube = cube;
 			__all__.init = init;
+			__all__.kb = kb;
 			__all__.last_frame = last_frame;
 			__all__.now = now;
 			__all__.render = render;
 			__all__.renderer = renderer;
 			__all__.scene = scene;
 			__all__.set_element = set_element;
+			__all__.sign = sign;
 		__pragma__ ('</all>')
 	}) ();
    return __all__;

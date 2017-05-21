@@ -125,9 +125,7 @@
 					var Box2 = _ctor (api.Box2);
 					var Line3 = _ctor (api.Line3);
 					var Euler = _ctor (api.Euler);
-					var Vector4 = _ctor (api.Vector4);
 					var Vector3 = _ctor (api.Vector3);
-					var Vector2 = _ctor (api.Vector2);
 					var Quaternion = _ctor (api.Quaternion);
 					var Color = _ctor (api.Color);
 					var MorphBlendMesh = _ctor (api.MorphBlendMesh);
@@ -754,9 +752,7 @@
 						__all__.UnsignedShort5551Type = UnsignedShort5551Type;
 						__all__.UnsignedShort565Type = UnsignedShort565Type;
 						__all__.UnsignedShortType = UnsignedShortType;
-						__all__.Vector2 = Vector2;
 						__all__.Vector3 = Vector3;
-						__all__.Vector4 = Vector4;
 						__all__.VectorKeyframeTrack = VectorKeyframeTrack;
 						__all__.Vertex = Vertex;
 						__all__.VertexColors = VertexColors;
