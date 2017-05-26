@@ -284,7 +284,7 @@ def render():
     if len(asteroids) == 0:
         print ("GAME OVER")
         document.getElementById("ZZ").innerHTML = "<h1>GAME OVER</h1>"
-        return 
+        return
 
     requestAnimationFrame(render)
 
