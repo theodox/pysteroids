@@ -1,5 +1,5 @@
 "use strict";
-// Transcrypt'ed from Python, 2017-05-25 23:48:57
+// Transcrypt'ed from Python, 2017-05-25 23:54:40
 function ball () {
    var __symbols__ = ['__py3.6__', '__esv6__'];
     var __all__ = {};
@@ -3506,6 +3506,11 @@ function ball () {
 			document.onkeyup = kb.key_up;
 		};
 		var render = function () {
+			if (len (asteroids) == 0) {
+				print ('GAME OVER');
+				document.getElementById ('ZZ').innerHTML = '<h1>GAME OVER</h1>';
+				return ;
+			}
 			requestAnimationFrame (render);
 			var t = (new Date - last_frame) / 1000.0;
 			kb.py_update (t);
