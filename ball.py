@@ -280,6 +280,11 @@ def render():
     global last_frame
     global VELOCITY
 
+
+    if len(asteroids) == 0:
+        print ("GAME OVER")
+        document.getElementById("ZZ").innerHTML = "<h1>GAME OVER</h1>"
+
     requestAnimationFrame(render)
 
     t = (__new__(Date) - last_frame) / 1000.0
