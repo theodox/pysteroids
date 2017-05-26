@@ -105,53 +105,76 @@ last_frame = __new__(Date)
 kb = Keyboard()
 kb.add_handler('spin', ControlAxis('s', 'a', attack=1, decay=.6))
 kb.add_handler('thrust', ControlAxis('w', 'z', attack=.75, decay=2, deadzone=.1))
-kb.add_handler('fire', ControlAxis('q', 'b', attack=1))
+kb.add_handler('fire', ControlAxis('q', 'b', attack=10))
 
+
+class AABB:
+    def __init__(self, width, height, center):
+        self.hw = width / 2.0
+        self.hh = width / 2.0
+        self.position = center
+
+    def contains(self, item):
+        x = self.position.x
+        y = self.position.y
+        h = self.hh
+        w = self.hw
+        return  item.x > x - w and item.x < x + w and item.y > y - h and item.y < y + h
+
+    def update(self, pos):
+        self.position = pos
 
 class Bullet:
 
-    EXPIRES = 1.5
+    EXPIRES = 1
     RESET_POS = three.Vector3(0, 0, 1000)
-    BULLET_SPEED = 12
+    BULLET_SPEED = 50
     BULLET_POINTER = 0
     BULLETS = []
 
     def __init__(self):
         self.vector = three.Vector3(0,0,0)
-        self.geo = three.Mesh(three.BoxGeometry(1, 1, 1),
+        self.geo = three.Mesh(three.BoxGeometry(.25, .25, .25),
                               three.MeshBasicMaterial({'color': 0xffffff}))
+
         self.lifespan = 0
+        self.momentum  = three.Vector3(0,0,0)
         self.reset()
 
+
     def update(self, t):
-        if self.geo.visible:
+
+        if self.geo.position.z < 1000:
             self.lifespan += t
             if self.lifespan > self.EXPIRES:
                 self.reset()
                 return
-            #momentum  = self.vector.multiplyScalar(self.BULLET_SPEED * t)
-            #current_pos = self.geo.position
-            #self.geo.matrixWorld.setPosition(current_pos.add(momentum))
+            delta  = three.Vector3().copy(self.vector)
+            delta.multiplyScalar(self.BULLET_SPEED * t)
+            delta.add(self.momentum)
+            current_pos = self.geo.position.add(delta)
+            self.geo.position.set (current_pos.x, current_pos.y, current_pos.z)
+            wrap(self.geo)
 
     def reset(self):
-        self.geo.visible = False
-        self.geo.matrixWorld.setPosition(self.RESET_POS)
-
+        self.lifespan = 0
+        self.momentum = three.Vector3(0,0,0)
+        self.geo.position.set(self.RESET_POS.x, self.RESET_POS.y, self.RESET_POS.z)
 
 def make_bullets(scene, amount):
-    Bullet.BULLETS = [Bullet() for n in range(amount)]
-    for b in Bullet.BULLETS:
+    for n in range(amount):
+        b = Bullet()
         scene.add(b.geo)
+        Bullet.BULLETS.append(b)
 
-
-def fire(pos, vector):
+def fire(pos, vector, momentum):
     for eachbullet in Bullet.BULLETS:
-        if not eachbullet.geo.visible:
-            eachbullet.geo.matrixWorld.setPosition(pos)
+        if eachbullet.geo.position.z >= 1000:
+
+            eachbullet.geo.position.set(pos.x, pos.y, pos.z)
             eachbullet.vector = vector
             eachbullet.lifespan = 0
-            eachbullet.geo.visible = True
-
+            eachbullet.momentum = three.Vector3().copy(momentum).multiplyScalar(.66)
             return
     print ("click")
 
@@ -189,8 +212,7 @@ class Ship:
         self.exhaust.visible = thrust > 0
 
         if kb.get_axis('fire') == 1:
-            fire(self.geo.position, self.heading)
-            print("fire", self.geo.position.x, self.geo.position.y)
+            fire(self.geo.position, self.heading,  self.momentum)
             kb.clear('fire')
 
     def get_heading(self) -> float:
@@ -203,23 +225,27 @@ class Ship:
 
 
 class Asteroid:
-    def __init__(self):
+    def __init__(self, max_radius):
+        self.radius =  ((random.random() + 1) / 2.0) * max_radius
+
         self.geo = three.Mesh(
-            three.SphereGeometry(random.randint(1, 3)),
+            three.SphereGeometry(self.radius),
             three.MeshNormalMaterial()
         )
-        self.geo.position.set(random.random() * 10, random.random() * 10, 0)
-        self.momentum = three.Vector3(random.random() - 0.5, random.random() - 0.5, random.random() - 0.5)
+        self.geo.position.set(random.random() * 60 - 30, random.random() * 60 - 30, 0)
+        self.momentum = three.Vector3(random.random() - 0.5, random.random() - 0.5, 0)
         self.momentum.multiplyScalar(3)
+        self.bbox = AABB(self.radius *2, self.radius * 2, self.geo.position)
 
     def add(self, scene: three.Scene):
         scene.add(self.geo)
 
     def update(self, t):
         self.geo.translateOnAxis(self.momentum, t)
+        self.bbox.update(self.geo.position)
 
 
-asteroids = [Asteroid() for a in range(6)]
+asteroids = [Asteroid(4.5) for a in range(6)]
 ship = Ship()
 
 
@@ -259,6 +285,26 @@ def render():
     t = (__new__(Date) - last_frame) / 1000.0
     kb.update(t)
 
+    dead = []
+    for b in Bullet.BULLETS:
+        if b.geo.position.z < 1000:
+            for a in asteroids:
+                if a.bbox.contains(b.geo.position):
+                    d = a.geo.position.distanceTo(b.geo.position)
+                    if d < a.radius:
+                        b.reset()
+                        dead.append(a)
+    for d in dead:
+        asteroids.remove(d)
+        d.geo.visible = False
+        if d.radius > 1.5:
+            new_asteroids = random.randint(2, 4)
+            for n in range(new_asteroids):
+                new_a = Asteroid(d.radius / new_asteroids)
+                new_a.geo.position.set(d.geo.position.x, d.geo.position.y, 0)
+                new_a.add(scene)
+                asteroids.append(new_a)
+
     for b in Bullet.BULLETS:
         b.update(t)
 
@@ -267,6 +313,9 @@ def render():
     for item in asteroids:
         item.update(t)
         wrap(item.geo)
+
+
+
 
     renderer.render(scene, camera)
     last_frame = __new__(Date)

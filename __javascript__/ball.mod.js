@@ -130,52 +130,72 @@
 		var kb = Keyboard ();
 		kb.add_handler ('spin', ControlAxis ('s', 'a', __kwargtrans__ ({attack: 1, decay: 0.6})));
 		kb.add_handler ('thrust', ControlAxis ('w', 'z', __kwargtrans__ ({attack: 0.75, decay: 2, deadzone: 0.1})));
-		kb.add_handler ('fire', ControlAxis ('q', 'b', __kwargtrans__ ({attack: 1})));
+		kb.add_handler ('fire', ControlAxis ('q', 'b', __kwargtrans__ ({attack: 10})));
+		var AABB = __class__ ('AABB', [object], {
+			get __init__ () {return __get__ (this, function (self, width, height, center) {
+				self.hw = width / 2.0;
+				self.hh = width / 2.0;
+				self.position = center;
+			});},
+			get contains () {return __get__ (this, function (self, item) {
+				var x = self.position.x;
+				var y = self.position.y;
+				var h = self.hh;
+				var w = self.hw;
+				return item.x > x - w && item.x < x + w && item.y > y - h && item.y < y + h;
+			});},
+			get py_update () {return __get__ (this, function (self, pos) {
+				self.position = pos;
+			});}
+		});
 		var Bullet = __class__ ('Bullet', [object], {
-			EXPIRES: 1.5,
+			EXPIRES: 1,
 			RESET_POS: three.Vector3 (0, 0, 1000),
-			BULLET_SPEED: 12,
+			BULLET_SPEED: 50,
 			BULLET_POINTER: 0,
 			BULLETS: list ([]),
 			get __init__ () {return __get__ (this, function (self) {
 				self.vector = three.Vector3 (0, 0, 0);
-				self.geo = three.Mesh (three.BoxGeometry (1, 1, 1), three.MeshBasicMaterial (dict ({'color': 16777215})));
+				self.geo = three.Mesh (three.BoxGeometry (0.25, 0.25, 0.25), three.MeshBasicMaterial (dict ({'color': 16777215})));
 				self.lifespan = 0;
+				self.momentum = three.Vector3 (0, 0, 0);
 				self.reset ();
 			});},
 			get py_update () {return __get__ (this, function (self, t) {
-				if (self.geo.visible) {
+				if (self.geo.position.z < 1000) {
 					self.lifespan += t;
 					if (self.lifespan > self.EXPIRES) {
 						self.reset ();
 						return ;
 					}
+					var delta = three.Vector3 ().copy (self.vector);
+					delta.multiplyScalar (self.BULLET_SPEED * t);
+					delta.add (self.momentum);
+					var current_pos = self.geo.position.add (delta);
+					self.geo.position.set (current_pos.x, current_pos.y, current_pos.z);
+					wrap (self.geo);
 				}
 			});},
 			get reset () {return __get__ (this, function (self) {
-				self.geo.visible = false;
-				self.geo.matrixWorld.setPosition (self.RESET_POS);
+				self.lifespan = 0;
+				self.momentum = three.Vector3 (0, 0, 0);
+				self.geo.position.set (self.RESET_POS.x, self.RESET_POS.y, self.RESET_POS.z);
 			});}
 		});
 		var make_bullets = function (scene, amount) {
-			Bullet.BULLETS = function () {
-				var __accu0__ = [];
-				for (var n = 0; n < amount; n++) {
-					__accu0__.append (Bullet ());
-				}
-				return __accu0__;
-			} ();
-			for (var b of Bullet.BULLETS) {
+			for (var n = 0; n < amount; n++) {
+				var b = Bullet ();
 				scene.add (b.geo);
+				Bullet.BULLETS.append (b);
 			}
 		};
-		var fire = function (pos, vector) {
+		var fire = function (pos, vector, momentum) {
 			for (var eachbullet of Bullet.BULLETS) {
-				if (!(eachbullet.geo.visible)) {
-					eachbullet.geo.matrixWorld.setPosition (pos);
+				if (eachbullet.geo.position.z >= 1000) {
+					eachbullet.geo.position.set (pos.x, pos.y, pos.z);
 					eachbullet.vector = vector;
 					eachbullet.lifespan = 0;
-					eachbullet.geo.visible = true;
+					eachbullet.momentum = three.Vector3 ().copy (momentum).multiplyScalar (0.66);
 					return ;
 				}
 			}
@@ -206,8 +226,7 @@
 				self.geo.matrixWorld.setPosition (current_pos.add (self.momentum));
 				self.exhaust.visible = thrust > 0;
 				if (kb.get_axis ('fire') == 1) {
-					fire (self.geo.position, self.heading);
-					print ('fire', self.geo.position.x, self.geo.position.y);
+					fire (self.geo.position, self.heading, self.momentum);
 					kb.py_clear ('fire');
 				}
 			});},
@@ -217,23 +236,26 @@
 		});
 		Object.defineProperty (Ship, 'heading', property.call (Ship, Ship.get_heading));;
 		var Asteroid = __class__ ('Asteroid', [object], {
-			get __init__ () {return __get__ (this, function (self) {
-				self.geo = three.Mesh (three.SphereGeometry (random.randint (1, 3)), three.MeshNormalMaterial ());
-				self.geo.position.set (random.random () * 10, random.random () * 10, 0);
-				self.momentum = three.Vector3 (random.random () - 0.5, random.random () - 0.5, random.random () - 0.5);
+			get __init__ () {return __get__ (this, function (self, max_radius) {
+				self.radius = ((random.random () + 1) / 2.0) * max_radius;
+				self.geo = three.Mesh (three.SphereGeometry (self.radius), three.MeshNormalMaterial ());
+				self.geo.position.set (random.random () * 60 - 30, random.random () * 60 - 30, 0);
+				self.momentum = three.Vector3 (random.random () - 0.5, random.random () - 0.5, 0);
 				self.momentum.multiplyScalar (3);
+				self.bbox = AABB (self.radius * 2, self.radius * 2, self.geo.position);
 			});},
 			get add () {return __get__ (this, function (self, scene) {
 				scene.add (self.geo);
 			});},
 			get py_update () {return __get__ (this, function (self, t) {
 				self.geo.translateOnAxis (self.momentum, t);
+				self.bbox.py_update (self.geo.position);
 			});}
 		});
 		var asteroids = function () {
 			var __accu0__ = [];
 			for (var a = 0; a < 6; a++) {
-				__accu0__.append (Asteroid ());
+				__accu0__.append (Asteroid (4.5));
 			}
 			return __accu0__;
 		} ();
@@ -258,6 +280,33 @@
 			requestAnimationFrame (render);
 			var t = (new Date - last_frame) / 1000.0;
 			kb.py_update (t);
+			var dead = list ([]);
+			for (var b of Bullet.BULLETS) {
+				if (b.geo.position.z < 1000) {
+					for (var a of asteroids) {
+						if (a.bbox.contains (b.geo.position)) {
+							var d = a.geo.position.distanceTo (b.geo.position);
+							if (d < a.radius) {
+								b.reset ();
+								dead.append (a);
+							}
+						}
+					}
+				}
+			}
+			for (var d of dead) {
+				asteroids.remove (d);
+				d.geo.visible = false;
+				if (d.radius > 1.5) {
+					var new_asteroids = random.randint (2, 4);
+					for (var n = 0; n < new_asteroids; n++) {
+						var new_a = Asteroid (d.radius / new_asteroids);
+						new_a.geo.position.set (d.geo.position.x, d.geo.position.y, 0);
+						new_a.add (scene);
+						asteroids.append (new_a);
+					}
+				}
+			}
 			for (var b of Bullet.BULLETS) {
 				b.py_update (t);
 			}
@@ -277,6 +326,7 @@
 			'random' +
 		'</use>')
 		__pragma__ ('<all>')
+			__all__.AABB = AABB;
 			__all__.Asteroid = Asteroid;
 			__all__.Bullet = Bullet;
 			__all__.ControlAxis = ControlAxis;
