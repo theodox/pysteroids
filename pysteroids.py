@@ -1,37 +1,7 @@
-import org.threejs as three
 import random
 
-
-def wrap(obj: three.Object3d):
-    pos = obj.position
-
-    if pos.x < -30:
-        pos.x = 30
-    elif pos.x > 30:
-        pos.x = -30
-
-    if pos.y < -30:
-        pos.y = 30
-    elif pos.y > 30:
-        pos.y = -30
-
-    obj.matrixWorld.setPosition(pos)
-
-
-def clamp(val, low, high):
-    return max(min(val, high), low)
-
-
-def sign(val):
-    if val > 0:
-        return 1
-    if val < 0:
-        return -1
-    return 0
-
-
-def now():
-    return __new__(Date)
+import org.threejs as three
+from utils import wrap, clamp, now
 
 
 def set_element(id, value):
@@ -119,13 +89,13 @@ class AABB:
         y = self.position.y
         h = self.hh
         w = self.hw
-        return  item.x > x - w and item.x < x + w and item.y > y - h and item.y < y + h
+        return item.x > x - w and item.x < x + w and item.y > y - h and item.y < y + h
 
     def update(self, pos):
         self.position = pos
 
-class Bullet:
 
+class Bullet:
     EXPIRES = 1
     RESET_POS = three.Vector3(0, 0, 1000)
     BULLET_SPEED = 50
@@ -133,14 +103,13 @@ class Bullet:
     BULLETS = []
 
     def __init__(self):
-        self.vector = three.Vector3(0,0,0)
+        self.vector = three.Vector3(0, 0, 0)
         self.geo = three.Mesh(three.BoxGeometry(.25, .25, .25),
                               three.MeshBasicMaterial({'color': 0xffffff}))
 
         self.lifespan = 0
-        self.momentum  = three.Vector3(0,0,0)
+        self.momentum = three.Vector3(0, 0, 0)
         self.reset()
-
 
     def update(self, t):
 
@@ -149,17 +118,18 @@ class Bullet:
             if self.lifespan > self.EXPIRES:
                 self.reset()
                 return
-            delta  = three.Vector3().copy(self.vector)
+            delta = three.Vector3().copy(self.vector)
             delta.multiplyScalar(self.BULLET_SPEED * t)
             delta.add(self.momentum)
             current_pos = self.geo.position.add(delta)
-            self.geo.position.set (current_pos.x, current_pos.y, current_pos.z)
+            self.geo.position.set(current_pos.x, current_pos.y, current_pos.z)
             wrap(self.geo)
 
     def reset(self):
         self.lifespan = 0
-        self.momentum = three.Vector3(0,0,0)
+        self.momentum = three.Vector3(0, 0, 0)
         self.geo.position.set(self.RESET_POS.x, self.RESET_POS.y, self.RESET_POS.z)
+
 
 def make_bullets(scene, amount):
     for n in range(amount):
@@ -167,16 +137,17 @@ def make_bullets(scene, amount):
         scene.add(b.geo)
         Bullet.BULLETS.append(b)
 
+
 def fire(pos, vector, momentum):
     for eachbullet in Bullet.BULLETS:
         if eachbullet.geo.position.z >= 1000:
-
             eachbullet.geo.position.set(pos.x, pos.y, pos.z)
             eachbullet.vector = vector
             eachbullet.lifespan = 0
             eachbullet.momentum = three.Vector3().copy(momentum).multiplyScalar(.66)
             return
-    print ("click")
+    print("click")
+
 
 class Ship:
     ROTATE_SPEED = 2.1
@@ -212,7 +183,7 @@ class Ship:
         self.exhaust.visible = thrust > 0
 
         if kb.get_axis('fire') == 1:
-            fire(self.geo.position, self.heading,  self.momentum)
+            fire(self.geo.position, self.heading, self.momentum)
             kb.clear('fire')
 
     def get_heading(self) -> float:
@@ -226,7 +197,7 @@ class Ship:
 
 class Asteroid:
     def __init__(self, max_radius):
-        self.radius =  ((random.random() + 1) / 2.0) * max_radius
+        self.radius = ((random.random() + 1) / 2.0) * max_radius
 
         self.geo = three.Mesh(
             three.SphereGeometry(self.radius),
@@ -235,7 +206,7 @@ class Asteroid:
         self.geo.position.set(random.random() * 60 - 30, random.random() * 60 - 30, 0)
         self.momentum = three.Vector3(random.random() - 0.5, random.random() - 0.5, 0)
         self.momentum.multiplyScalar(3)
-        self.bbox = AABB(self.radius *2, self.radius * 2, self.geo.position)
+        self.bbox = AABB(self.radius * 2, self.radius * 2, self.geo.position)
 
     def add(self, scene: three.Scene):
         scene.add(self.geo)
@@ -280,9 +251,8 @@ def render():
     global last_frame
     global VELOCITY
 
-
     if len(asteroids) == 0:
-        print ("GAME OVER")
+        print("GAME OVER")
         document.getElementById("ZZ").innerHTML = "<h1>GAME OVER</h1>"
         return
 
@@ -320,11 +290,8 @@ def render():
         item.update(t)
         wrap(item.geo)
 
-
-
-
     renderer.render(scene, camera)
-    last_frame = __new__(Date)
+    last_frame = now()
 
 
 init()

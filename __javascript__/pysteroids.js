@@ -1,5 +1,5 @@
 "use strict";
-// Transcrypt'ed from Python, 2017-05-26 21:58:11
+// Transcrypt'ed from Python, 2017-05-26 22:40:47
 function pysteroids () {
    var __symbols__ = ['__py3.6__', '__esv6__'];
     var __all__ = {};
@@ -3227,41 +3227,70 @@ function pysteroids () {
 			}
 		}
 	);
+	__nest__ (
+		__all__,
+		'utils', {
+			__all__: {
+				__inited__: false,
+				__init__: function (__all__) {
+					var three = __init__ (__world__.org.threejs);
+					var pad_wrap = function (min, max, val) {
+						if (val < min) {
+							return max;
+						}
+						if (val > max) {
+							return min;
+						}
+						return val;
+					};
+					var wrap = function (obj) {
+						var WRAP = 30;
+						var NWRAP = -(30);
+						var __left0__ = tuple ([obj.position.x, obj.position.y, obj.position.z]);
+						var x = __left0__ [0];
+						var y = __left0__ [1];
+						var z = __left0__ [2];
+						var x = pad_wrap (NWRAP, WRAP, x);
+						var y = pad_wrap (NWRAP, WRAP, y);
+						obj.position.set (x, y, z);
+					};
+					var clamp = function (val, low, high) {
+						return max (min (val, high), low);
+					};
+					var sign = function (val) {
+						if (val > 0) {
+							return 1;
+						}
+						if (val < 0) {
+							return -(1);
+						}
+						return 0;
+					};
+					var now = function () {
+						return new Date;
+					};
+					__pragma__ ('<use>' +
+						'org.threejs' +
+					'</use>')
+					__pragma__ ('<all>')
+						__all__.clamp = clamp;
+						__all__.now = now;
+						__all__.pad_wrap = pad_wrap;
+						__all__.sign = sign;
+						__all__.three = three;
+						__all__.wrap = wrap;
+					__pragma__ ('</all>')
+				}
+			}
+		}
+	);
 	(function () {
 		var random = {};
-		var three =  __init__ (__world__.org.threejs);
 		__nest__ (random, '', __init__ (__world__.random));
-		var wrap = function (obj) {
-			var pos = obj.position;
-			if (pos.x < -(30)) {
-				pos.x = 30;
-			}
-			else if (pos.x > 30) {
-				pos.x = -(30);
-			}
-			if (pos.y < -(30)) {
-				pos.y = 30;
-			}
-			else if (pos.y > 30) {
-				pos.y = -(30);
-			}
-			obj.matrixWorld.setPosition (pos);
-		};
-		var clamp = function (val, low, high) {
-			return max (min (val, high), low);
-		};
-		var sign = function (val) {
-			if (val > 0) {
-				return 1;
-			}
-			if (val < 0) {
-				return -(1);
-			}
-			return 0;
-		};
-		var now = function () {
-			return new Date;
-		};
+		var three =  __init__ (__world__.org.threejs);
+		var wrap = __init__ (__world__.utils).wrap;
+		var clamp = __init__ (__world__.utils).clamp;
+		var now = __init__ (__world__.utils).now;
 		var set_element = function (id, value) {
 			document.getElementById (id).innerHTML = value;
 		};
@@ -3551,13 +3580,14 @@ function pysteroids () {
 				wrap (item.geo);
 			}
 			renderer.render (scene, camera);
-			last_frame = new Date;
+			last_frame = now ();
 		};
 		init ();
 		render ();
 		__pragma__ ('<use>' +
 			'org.threejs' +
 			'random' +
+			'utils' +
 		'</use>')
 		__pragma__ ('<all>')
 			__all__.AABB = AABB;
@@ -3583,7 +3613,6 @@ function pysteroids () {
 			__all__.scene = scene;
 			__all__.set_element = set_element;
 			__all__.ship = ship;
-			__all__.sign = sign;
 			__all__.wrap = wrap;
 		__pragma__ ('</all>')
 	}) ();

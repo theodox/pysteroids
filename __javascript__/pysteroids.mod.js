@@ -1,38 +1,10 @@
 	(function () {
 		var random = {};
-		var three =  __init__ (__world__.org.threejs);
 		__nest__ (random, '', __init__ (__world__.random));
-		var wrap = function (obj) {
-			var pos = obj.position;
-			if (pos.x < -(30)) {
-				pos.x = 30;
-			}
-			else if (pos.x > 30) {
-				pos.x = -(30);
-			}
-			if (pos.y < -(30)) {
-				pos.y = 30;
-			}
-			else if (pos.y > 30) {
-				pos.y = -(30);
-			}
-			obj.matrixWorld.setPosition (pos);
-		};
-		var clamp = function (val, low, high) {
-			return max (min (val, high), low);
-		};
-		var sign = function (val) {
-			if (val > 0) {
-				return 1;
-			}
-			if (val < 0) {
-				return -(1);
-			}
-			return 0;
-		};
-		var now = function () {
-			return new Date;
-		};
+		var three =  __init__ (__world__.org.threejs);
+		var wrap = __init__ (__world__.utils).wrap;
+		var clamp = __init__ (__world__.utils).clamp;
+		var now = __init__ (__world__.utils).now;
 		var set_element = function (id, value) {
 			document.getElementById (id).innerHTML = value;
 		};
@@ -322,13 +294,14 @@
 				wrap (item.geo);
 			}
 			renderer.render (scene, camera);
-			last_frame = new Date;
+			last_frame = now ();
 		};
 		init ();
 		render ();
 		__pragma__ ('<use>' +
 			'org.threejs' +
 			'random' +
+			'utils' +
 		'</use>')
 		__pragma__ ('<all>')
 			__all__.AABB = AABB;
@@ -354,7 +327,6 @@
 			__all__.scene = scene;
 			__all__.set_element = set_element;
 			__all__.ship = ship;
-			__all__.sign = sign;
 			__all__.wrap = wrap;
 		__pragma__ ('</all>')
 	}) ();
