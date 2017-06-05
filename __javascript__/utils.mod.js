@@ -40,13 +40,35 @@
 					var now = function () {
 						return new Date;
 					};
+					var set_element = function (id, value) {
+						document.getElementById (id).innerHTML = value;
+					};
+					var AABB = __class__ ('AABB', [object], {
+						get __init__ () {return __get__ (this, function (self, width, height, center) {
+							self.hw = width / 2.0;
+							self.hh = width / 2.0;
+							self.position = center;
+						});},
+						get contains () {return __get__ (this, function (self, item) {
+							var x = self.position.x;
+							var y = self.position.y;
+							var h = self.hh;
+							var w = self.hw;
+							return item.x > x - w && item.x < x + w && item.y > y - h && item.y < y + h;
+						});},
+						get py_update () {return __get__ (this, function (self, pos) {
+							self.position = pos;
+						});}
+					});
 					__pragma__ ('<use>' +
 						'org.threejs' +
 					'</use>')
 					__pragma__ ('<all>')
+						__all__.AABB = AABB;
 						__all__.clamp = clamp;
 						__all__.now = now;
 						__all__.pad_wrap = pad_wrap;
+						__all__.set_element = set_element;
 						__all__.sign = sign;
 						__all__.three = three;
 						__all__.wrap = wrap;

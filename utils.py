@@ -32,3 +32,24 @@ def sign(val):
 
 def now():
     return __new__(Date)
+
+
+def set_element(id, value):
+    document.getElementById(id).innerHTML = value
+
+
+class AABB:
+    def __init__(self, width, height, center):
+        self.hw = width / 2.0
+        self.hh = width / 2.0
+        self.position = center
+
+    def contains(self, item):
+        x = self.position.x
+        y = self.position.y
+        h = self.hh
+        w = self.hw
+        return item.x > x - w and item.x < x + w and item.y > y - h and item.y < y + h
+
+    def update(self, pos):
+        self.position = pos
