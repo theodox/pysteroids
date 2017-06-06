@@ -61,9 +61,9 @@
 					var y = random.randint (-(30), 30);
 					var z = 0;
 					var r = (random.random () + 1.0) * 2.5;
-					var mx = 2;
-					var my = 2;
 					var asteroid = Asteroid (r, three.Vector3 (x, y, z));
+					var mx = 2.0;
+					var my = 2.0;
 					asteroid.momentum = three.Vector3 (mx, my, 0);
 					self.graphics.add (asteroid);
 					self.asteroids.append (asteroid);
@@ -104,6 +104,10 @@
 						var new_asteroids = random.randint (2, 5);
 						for (var n = 0; n < new_asteroids; n++) {
 							var new_a = Asteroid ((d.radius + 1.0) / new_asteroids, d.position);
+							var xr = random.random ();
+							var yr = random.random ();
+							new_a.momentum = three.Vector3 ().copy (d.momentum);
+							new_a.momentum.add (three.Vector3 (xr, yr, 0));
 							self.graphics.add (new_a);
 							self.asteroids.append (new_a);
 						}
@@ -121,7 +125,7 @@
 				self.graphics.render ();
 				self.last_frame = now ();
 			});},
-			get fire () {return __get__ (this, function (self, pos, vector, momentum) {
+			get fire () {return __get__ (this, function (self, pos, vector, momentum, t) {
 				for (var each_bullet of self.bullets) {
 					if (each_bullet.geo.position.z >= 1000) {
 						each_bullet.geo.position.set (pos.x, pos.y, pos.z);

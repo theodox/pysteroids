@@ -1,5 +1,5 @@
 "use strict";
-// Transcrypt'ed from Python, 2017-06-05 22:30:48
+// Transcrypt'ed from Python, 2017-06-06 00:26:02
 function pysteroids () {
    var __symbols__ = ['__py3.6__', '__esv6__'];
     var __all__ = {};
@@ -3348,6 +3348,12 @@ function pysteroids () {
 						});},
 						get get_position () {return __get__ (this, function (self) {
 							return self.geo.position;
+						});},
+						get py_update () {return __get__ (this, function (self, t) {
+							var current_pos = self.geo.position;
+							var move = three.Vector3 ().copy (self.momentum);
+							move.multiplyScalar (t);
+							self.geo.matrixWorld.setPosition (current_pos.add (move));
 						});}
 					});
 					Object.defineProperty (Unit, 'position', property.call (Unit, Unit.get_position));;
@@ -3371,14 +3377,14 @@ function pysteroids () {
 							var thrust = self.keyboard.get_axis ('thrust');
 							self.geo.rotateZ (((self.keyboard.get_axis ('spin') * self.ROTATE_SPEED) * t) * -(1));
 							if (thrust > 0) {
-								var thrust_amt = (thrust * self.THRUST) * t;
+								var thrust_amt = thrust * self.THRUST;
 								self.momentum = self.momentum.add (self.heading.multiplyScalar (thrust_amt));
 							}
-							var current_pos = self.geo.position;
-							self.geo.matrixWorld.setPosition (current_pos.add (self.momentum));
+							Unit.py_update (self, t);
 							self.exhaust.visible = thrust > 0;
 							if (self.keyboard.get_axis ('fire') >= 1) {
-								self.game.fire (self.geo.position, self.heading, self.momentum);
+								var mo = three.Vector3 ().copy (self.momentum).multiplyScalar (t);
+								self.game.fire (self.geo.position, self.heading, mo);
 								self.keyboard.py_clear ('fire');
 							}
 							self.bbox.py_update (self.position);
@@ -3398,9 +3404,7 @@ function pysteroids () {
 							self.momentum = three.Vector3 (0, 0, 0);
 						});},
 						get py_update () {return __get__ (this, function (self, t) {
-							var current_pos = self.geo.position;
-							var move = self.momentum.multiplyScalar (t);
-							self.geo.matrixWorld.setPosition (current_pos.add (move));
+							Unit.py_update (self, t);
 							self.bbox.py_update (self.position);
 						});}
 					});
@@ -3600,9 +3604,9 @@ function pysteroids () {
 					var y = random.randint (-(30), 30);
 					var z = 0;
 					var r = (random.random () + 1.0) * 2.5;
-					var mx = 2;
-					var my = 2;
 					var asteroid = Asteroid (r, three.Vector3 (x, y, z));
+					var mx = 2.0;
+					var my = 2.0;
 					asteroid.momentum = three.Vector3 (mx, my, 0);
 					self.graphics.add (asteroid);
 					self.asteroids.append (asteroid);
@@ -3643,6 +3647,10 @@ function pysteroids () {
 						var new_asteroids = random.randint (2, 5);
 						for (var n = 0; n < new_asteroids; n++) {
 							var new_a = Asteroid ((d.radius + 1.0) / new_asteroids, d.position);
+							var xr = random.random ();
+							var yr = random.random ();
+							new_a.momentum = three.Vector3 ().copy (d.momentum);
+							new_a.momentum.add (three.Vector3 (xr, yr, 0));
 							self.graphics.add (new_a);
 							self.asteroids.append (new_a);
 						}
@@ -3660,7 +3668,7 @@ function pysteroids () {
 				self.graphics.render ();
 				self.last_frame = now ();
 			});},
-			get fire () {return __get__ (this, function (self, pos, vector, momentum) {
+			get fire () {return __get__ (this, function (self, pos, vector, momentum, t) {
 				for (var each_bullet of self.bullets) {
 					if (each_bullet.geo.position.z >= 1000) {
 						each_bullet.geo.position.set (pos.x, pos.y, pos.z);

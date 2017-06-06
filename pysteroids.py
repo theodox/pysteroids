@@ -58,10 +58,10 @@ class Game:
             y = random.randint(-30,30)
             z = 0
             r = (random.random() + 1.0) * 2.5
-
-            mx = 2
-            my = 2
             asteroid = Asteroid(r, three.Vector3(x, y, z))
+
+            mx = 2.0
+            my = 2.0
             asteroid.momentum = three.Vector3(mx, my, 0)
 
             self.graphics.add(asteroid)
@@ -102,6 +102,10 @@ class Game:
                 new_asteroids = random.randint(2, 5)
                 for n in range(new_asteroids):
                     new_a = Asteroid((d.radius + 1.0) / new_asteroids, d.position)
+                    xr = random.random()
+                    yr = random.random()
+                    new_a.momentum = three.Vector3().copy(d.momentum)
+                    new_a.momentum.add( three.Vector3(xr, yr, 0))
                     self.graphics.add(new_a)
                     self.asteroids.append(new_a)
 
@@ -118,7 +122,7 @@ class Game:
         self.graphics.render()
         self.last_frame = now()
 
-    def fire(self, pos, vector, momentum):
+    def fire(self, pos, vector, momentum, t):
         for each_bullet in self.bullets:
             if each_bullet.geo.position.z >= 1000:
                 each_bullet.geo.position.set(pos.x, pos.y, pos.z)

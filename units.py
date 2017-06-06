@@ -12,6 +12,12 @@ class Unit:
     def get_position(self):
         return self.geo.position
 
+    def update(self, t):
+        current_pos = self.geo.position
+        move = three.Vector3().copy(self.momentum)
+        move.multiplyScalar(t)
+        self.geo.matrixWorld.setPosition(current_pos.add(move))
+
     position = property(get_position)
 
 
@@ -44,15 +50,15 @@ class Ship(Unit):
         self.geo.rotateZ(self.keyboard.get_axis('spin') * self.ROTATE_SPEED * t * -1)
 
         if thrust > 0:
-            thrust_amt = thrust * self.THRUST * t
+            thrust_amt = thrust * self.THRUST
             self.momentum = self.momentum.add(self.heading.multiplyScalar(thrust_amt))
 
-        current_pos = self.geo.position
-        self.geo.matrixWorld.setPosition(current_pos.add(self.momentum))
+        Unit.update(self, t)
         self.exhaust.visible = thrust > 0
 
         if self.keyboard.get_axis('fire') >= 1:
-            self.game.fire(self.geo.position, self.heading, self.momentum)
+            mo = three.Vector3().copy(self.momentum).multiplyScalar(t)
+            self.game.fire(self.geo.position, self.heading, mo)
             self.keyboard.clear('fire')
         self.bbox.update(self.position)
 
@@ -75,14 +81,12 @@ class Asteroid(Unit):
         )
         self.geo.position.set(pos.x, pos.y, pos.z)
         self.bbox = AABB(self.radius * 2, self.radius * 2, self.geo.position)
-        self.momentum = three.Vector3(0,0,0)
+        self.momentum = three.Vector3(0, 0, 0)
 
     def update(self, t):
-
-        current_pos = self.geo.position
-        move = self.momentum.multiplyScalar(t)
-        self.geo.matrixWorld.setPosition(current_pos.add(move))
+        Unit.update(self, t)
         self.bbox.update(self.position)
+
 
 
 class Bullet:

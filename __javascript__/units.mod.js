@@ -16,6 +16,12 @@
 						});},
 						get get_position () {return __get__ (this, function (self) {
 							return self.geo.position;
+						});},
+						get py_update () {return __get__ (this, function (self, t) {
+							var current_pos = self.geo.position;
+							var move = three.Vector3 ().copy (self.momentum);
+							move.multiplyScalar (t);
+							self.geo.matrixWorld.setPosition (current_pos.add (move));
 						});}
 					});
 					Object.defineProperty (Unit, 'position', property.call (Unit, Unit.get_position));;
@@ -39,14 +45,14 @@
 							var thrust = self.keyboard.get_axis ('thrust');
 							self.geo.rotateZ (((self.keyboard.get_axis ('spin') * self.ROTATE_SPEED) * t) * -(1));
 							if (thrust > 0) {
-								var thrust_amt = (thrust * self.THRUST) * t;
+								var thrust_amt = thrust * self.THRUST;
 								self.momentum = self.momentum.add (self.heading.multiplyScalar (thrust_amt));
 							}
-							var current_pos = self.geo.position;
-							self.geo.matrixWorld.setPosition (current_pos.add (self.momentum));
+							Unit.py_update (self, t);
 							self.exhaust.visible = thrust > 0;
 							if (self.keyboard.get_axis ('fire') >= 1) {
-								self.game.fire (self.geo.position, self.heading, self.momentum);
+								var mo = three.Vector3 ().copy (self.momentum).multiplyScalar (t);
+								self.game.fire (self.geo.position, self.heading, mo);
 								self.keyboard.py_clear ('fire');
 							}
 							self.bbox.py_update (self.position);
@@ -66,9 +72,7 @@
 							self.momentum = three.Vector3 (0, 0, 0);
 						});},
 						get py_update () {return __get__ (this, function (self, t) {
-							var current_pos = self.geo.position;
-							var move = self.momentum.multiplyScalar (t);
-							self.geo.matrixWorld.setPosition (current_pos.add (move));
+							Unit.py_update (self, t);
 							self.bbox.py_update (self.position);
 						});}
 					});
