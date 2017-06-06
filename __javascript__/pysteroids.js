@@ -1,5 +1,5 @@
 "use strict";
-// Transcrypt'ed from Python, 2017-06-04 23:30:08
+// Transcrypt'ed from Python, 2017-06-05 22:30:48
 function pysteroids () {
    var __symbols__ = ['__py3.6__', '__esv6__'];
     var __all__ = {};
@@ -3377,7 +3377,7 @@ function pysteroids () {
 							var current_pos = self.geo.position;
 							self.geo.matrixWorld.setPosition (current_pos.add (self.momentum));
 							self.exhaust.visible = thrust > 0;
-							if (self.keyboard.get_axis ('fire') > 0.25) {
+							if (self.keyboard.get_axis ('fire') >= 1) {
 								self.game.fire (self.geo.position, self.heading, self.momentum);
 								self.keyboard.py_clear ('fire');
 							}
@@ -3388,15 +3388,19 @@ function pysteroids () {
 						});}
 					});
 					Object.defineProperty (Ship, 'heading', property.call (Ship, Ship.get_heading));;
-					var Asteroid = __class__ ('Asteroid', [object], {
+					var Asteroid = __class__ ('Asteroid', [Unit], {
 						get __init__ () {return __get__ (this, function (self, radius, pos) {
+							Unit.__init__ (self);
 							self.radius = radius;
 							self.geo = three.Mesh (three.SphereGeometry (self.radius), three.MeshNormalMaterial ());
-							self.geo.position.set (pos);
+							self.geo.position.set (pos.x, pos.y, pos.z);
 							self.bbox = AABB (self.radius * 2, self.radius * 2, self.geo.position);
+							self.momentum = three.Vector3 (0, 0, 0);
 						});},
 						get py_update () {return __get__ (this, function (self, t) {
-							self.geo.translateOnAxis (self.momentum, t);
+							var current_pos = self.geo.position;
+							var move = self.momentum.multiplyScalar (t);
+							self.geo.matrixWorld.setPosition (current_pos.add (move));
 							self.bbox.py_update (self.position);
 						});}
 					});
@@ -3544,6 +3548,7 @@ function pysteroids () {
 		var Bullet = __init__ (__world__.units).Bullet;
 		var wrap = __init__ (__world__.utils).wrap;
 		var now = __init__ (__world__.utils).now;
+		var pad_wrap = __init__ (__world__.utils).pad_wrap;
 		var Graphics = __class__ ('Graphics', [object], {
 			get __init__ () {return __get__ (this, function (self, w, h, canvas) {
 				self.width = w;
@@ -3591,12 +3596,12 @@ function pysteroids () {
 					return 1;
 				};
 				for (var a = 0; a < 10; a++) {
-					var x = random.randint (15) + rsign () * 15;
-					var y = random.randint (15) + rsign () * 15;
+					var x = random.randint (-(30), 30);
+					var y = random.randint (-(30), 30);
 					var z = 0;
 					var r = (random.random () + 1.0) * 2.5;
-					var mx = (random.random () + 1.0) * 4 - 2.0;
-					var my = (random.random () + 1.0) * 4 - 2.0;
+					var mx = 2;
+					var my = 2;
 					var asteroid = Asteroid (r, three.Vector3 (x, y, z));
 					asteroid.momentum = three.Vector3 (mx, my, 0);
 					self.graphics.add (asteroid);
@@ -3621,8 +3626,8 @@ function pysteroids () {
 				for (var b of self.bullets) {
 					if (b.position.z < 1000) {
 						for (var a of self.asteroids) {
-							if (a.bbox.contains (b.geo.position)) {
-								var d = a.geo.position.distanceTo (b.geo.position);
+							if (a.bbox.contains (b.position)) {
+								var d = a.geo.position.distanceTo (b.position);
 								if (d < a.radius) {
 									b.reset ();
 									dead.append (a);
@@ -3637,8 +3642,7 @@ function pysteroids () {
 					if (d.radius > 1.5) {
 						var new_asteroids = random.randint (2, 5);
 						for (var n = 0; n < new_asteroids; n++) {
-							var new_a = Asteroid ((d.radius + 1.0) / new_asteroids);
-							new_a.geo.position.set (d.geo.position.x, d.geo.position.y, 0);
+							var new_a = Asteroid ((d.radius + 1.0) / new_asteroids, d.position);
 							self.graphics.add (new_a);
 							self.asteroids.append (new_a);
 						}
@@ -3720,6 +3724,7 @@ function pysteroids () {
 			__all__.canvas = canvas;
 			__all__.game = game;
 			__all__.now = now;
+			__all__.pad_wrap = pad_wrap;
 			__all__.wrap = wrap;
 		__pragma__ ('</all>')
 	}) ();

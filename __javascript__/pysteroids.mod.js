@@ -9,6 +9,7 @@
 		var Bullet = __init__ (__world__.units).Bullet;
 		var wrap = __init__ (__world__.utils).wrap;
 		var now = __init__ (__world__.utils).now;
+		var pad_wrap = __init__ (__world__.utils).pad_wrap;
 		var Graphics = __class__ ('Graphics', [object], {
 			get __init__ () {return __get__ (this, function (self, w, h, canvas) {
 				self.width = w;
@@ -56,12 +57,12 @@
 					return 1;
 				};
 				for (var a = 0; a < 10; a++) {
-					var x = random.randint (15) + rsign () * 15;
-					var y = random.randint (15) + rsign () * 15;
+					var x = random.randint (-(30), 30);
+					var y = random.randint (-(30), 30);
 					var z = 0;
 					var r = (random.random () + 1.0) * 2.5;
-					var mx = (random.random () + 1.0) * 4 - 2.0;
-					var my = (random.random () + 1.0) * 4 - 2.0;
+					var mx = 2;
+					var my = 2;
 					var asteroid = Asteroid (r, three.Vector3 (x, y, z));
 					asteroid.momentum = three.Vector3 (mx, my, 0);
 					self.graphics.add (asteroid);
@@ -86,8 +87,8 @@
 				for (var b of self.bullets) {
 					if (b.position.z < 1000) {
 						for (var a of self.asteroids) {
-							if (a.bbox.contains (b.geo.position)) {
-								var d = a.geo.position.distanceTo (b.geo.position);
+							if (a.bbox.contains (b.position)) {
+								var d = a.geo.position.distanceTo (b.position);
 								if (d < a.radius) {
 									b.reset ();
 									dead.append (a);
@@ -102,8 +103,7 @@
 					if (d.radius > 1.5) {
 						var new_asteroids = random.randint (2, 5);
 						for (var n = 0; n < new_asteroids; n++) {
-							var new_a = Asteroid ((d.radius + 1.0) / new_asteroids);
-							new_a.geo.position.set (d.geo.position.x, d.geo.position.y, 0);
+							var new_a = Asteroid ((d.radius + 1.0) / new_asteroids, d.position);
 							self.graphics.add (new_a);
 							self.asteroids.append (new_a);
 						}
@@ -185,6 +185,7 @@
 			__all__.canvas = canvas;
 			__all__.game = game;
 			__all__.now = now;
+			__all__.pad_wrap = pad_wrap;
 			__all__.wrap = wrap;
 		__pragma__ ('</all>')
 	}) ();

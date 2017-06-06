@@ -51,7 +51,7 @@ class Ship(Unit):
         self.geo.matrixWorld.setPosition(current_pos.add(self.momentum))
         self.exhaust.visible = thrust > 0
 
-        if self.keyboard.get_axis('fire') > 0.25:
+        if self.keyboard.get_axis('fire') >= 1:
             self.game.fire(self.geo.position, self.heading, self.momentum)
             self.keyboard.clear('fire')
         self.bbox.update(self.position)
@@ -65,22 +65,27 @@ class Ship(Unit):
     heading = property(get_heading)
 
 
-class Asteroid:
+class Asteroid(Unit):
     def __init__(self, radius, pos):
+        Unit.__init__(self)
         self.radius = radius
         self.geo = three.Mesh(
             three.SphereGeometry(self.radius),
             three.MeshNormalMaterial()
         )
-        self.geo.position.set(pos)
+        self.geo.position.set(pos.x, pos.y, pos.z)
         self.bbox = AABB(self.radius * 2, self.radius * 2, self.geo.position)
+        self.momentum = three.Vector3(0,0,0)
 
     def update(self, t):
-        self.geo.translateOnAxis(self.momentum, t)
+
+        current_pos = self.geo.position
+        move = self.momentum.multiplyScalar(t)
+        self.geo.matrixWorld.setPosition(current_pos.add(move))
         self.bbox.update(self.position)
 
 
-class Bullet():
+class Bullet:
     EXPIRES = 1
     RESET_POS = three.Vector3(0, 0, 1000)
     BULLET_SPEED = 50
@@ -113,8 +118,6 @@ class Bullet():
         self.lifespan = 0
         self.momentum = three.Vector3(0, 0, 0)
         self.geo.position.set(self.RESET_POS.x, self.RESET_POS.y, self.RESET_POS.z)
-
-
 
     def get_position(self):
         return self.geo.position

@@ -45,7 +45,7 @@
 							var current_pos = self.geo.position;
 							self.geo.matrixWorld.setPosition (current_pos.add (self.momentum));
 							self.exhaust.visible = thrust > 0;
-							if (self.keyboard.get_axis ('fire') > 0.25) {
+							if (self.keyboard.get_axis ('fire') >= 1) {
 								self.game.fire (self.geo.position, self.heading, self.momentum);
 								self.keyboard.py_clear ('fire');
 							}
@@ -56,15 +56,19 @@
 						});}
 					});
 					Object.defineProperty (Ship, 'heading', property.call (Ship, Ship.get_heading));;
-					var Asteroid = __class__ ('Asteroid', [object], {
+					var Asteroid = __class__ ('Asteroid', [Unit], {
 						get __init__ () {return __get__ (this, function (self, radius, pos) {
+							Unit.__init__ (self);
 							self.radius = radius;
 							self.geo = three.Mesh (three.SphereGeometry (self.radius), three.MeshNormalMaterial ());
-							self.geo.position.set (pos);
+							self.geo.position.set (pos.x, pos.y, pos.z);
 							self.bbox = AABB (self.radius * 2, self.radius * 2, self.geo.position);
+							self.momentum = three.Vector3 (0, 0, 0);
 						});},
 						get py_update () {return __get__ (this, function (self, t) {
-							self.geo.translateOnAxis (self.momentum, t);
+							var current_pos = self.geo.position;
+							var move = self.momentum.multiplyScalar (t);
+							self.geo.matrixWorld.setPosition (current_pos.add (move));
 							self.bbox.py_update (self.position);
 						});}
 					});
