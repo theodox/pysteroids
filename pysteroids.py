@@ -3,7 +3,8 @@ import random
 import org.threejs as three
 from controls import Keyboard, ControlAxis
 from units import Ship, Asteroid, Bullet
-from utils import wrap, now, pad_wrap
+from utils import wrap, now, pad_wrap, set_element
+import  logging
 
 
 class Graphics:
@@ -25,6 +26,34 @@ class Graphics:
         self.scene.add(item.geo)
 
 
+class FPSCounter:
+
+    def __init__(self, hud_element):
+        self.frames = [0.1]
+        for n in range(99):
+            self.frames.append(0.1)
+        self.next_frame = 0
+        self.average = 0
+        self.visible = True
+        self.element = hud_element
+
+    def update(self, t):
+        self.frames[self.next_frame] = t
+        self.next_frame +=1
+        if self.next_frame > 99:
+            self.next_frame = 0
+
+        sum = lambda a, b: a + b
+        total = 0
+        for n in range(100):
+            total += self.frames[n]
+
+        self.average = total * 10
+        if self.visible:
+            # @todo: need a string formatting option to print out decimal MS
+            self.element.innerHTML = "{} fps".format(int(1000 / self.average))
+
+
 class Game:
     def __init__(self, canvas):
         self.keyboard = Keyboard()
@@ -35,6 +64,9 @@ class Game:
         self.asteroids = []
         self.setup()
         self.last_frame = now()
+        logging.warning(document.getElementById("FPS"))
+        self.fps_counter = FPSCounter(document.getElementById("FPS"))
+
 
     def create_controls(self):
         self.keyboard.add_handler('spin', ControlAxis('ArrowRight', 'ArrowLeft', attack=1, decay=.6))
@@ -84,9 +116,12 @@ class Game:
             document.getElementById("ZZ").innerHTML = "<h1>GAME OVER</h1>"
             return
 
+
         requestAnimationFrame(self.tick)
 
         t = (now() - self.last_frame) / 1000.0
+
+        self.fps_counter.update(t)
         self.keyboard.update(t)
 
         # controls

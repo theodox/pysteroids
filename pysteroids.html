@@ -2,9 +2,26 @@
 <head>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
 </head>
+<style>
+    #title { position: absolute;
+    left: 32px;
+    top: 32px;
+    color: #AAAAAA;
+    }
+    #FPS { position: absolute;
+    left: 32px;
+    top: 64px;
+    color: #AAAAAA;
+    }
+</style>
 <body>
-<div id="game_canvas">THREE</div>
-<div id="ZZ">THREE</div>
+<div id="frame">
+    <div id="game_canvas">THREE</div>
+    <h2 id="title">Pysteroids</h2>
+    <h3 id="FPS">999</h3>
+    <div id="ZZ" po>THREE</div>
+
+</div>
 
 <script src="__javascript__/pysteroids.js"></script>
 

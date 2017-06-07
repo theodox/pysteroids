@@ -1,4 +1,5 @@
 	(function () {
+		var logging = {};
 		var random = {};
 		__nest__ (random, '', __init__ (__world__.random));
 		var three =  __init__ (__world__.org.threejs);
@@ -10,6 +11,8 @@
 		var wrap = __init__ (__world__.utils).wrap;
 		var now = __init__ (__world__.utils).now;
 		var pad_wrap = __init__ (__world__.utils).pad_wrap;
+		var set_element = __init__ (__world__.utils).set_element;
+		__nest__ (logging, '', __init__ (__world__.logging));
 		var Graphics = __class__ ('Graphics', [object], {
 			get __init__ () {return __get__ (this, function (self, w, h, canvas) {
 				self.width = w;
@@ -29,6 +32,36 @@
 				self.scene.add (item.geo);
 			});}
 		});
+		var FPSCounter = __class__ ('FPSCounter', [object], {
+			get __init__ () {return __get__ (this, function (self, hud_element) {
+				self.frames = list ([0.1]);
+				for (var n = 0; n < 99; n++) {
+					self.frames.append (0.1);
+				}
+				self.next_frame = 0;
+				self.average = 0;
+				self.visible = true;
+				self.element = hud_element;
+			});},
+			get py_update () {return __get__ (this, function (self, t) {
+				self.frames [self.next_frame] = t;
+				self.next_frame++;
+				if (self.next_frame > 99) {
+					self.next_frame = 0;
+				}
+				var sum = (function __lambda__ (a, b) {
+					return a + b;
+				});
+				var total = 0;
+				for (var n = 0; n < 100; n++) {
+					total += self.frames [n];
+				}
+				self.average = total * 10;
+				if (self.visible) {
+					self.element.innerHTML = '{} fps'.format (int (1000 / self.average));
+				}
+			});}
+		});
 		var Game = __class__ ('Game', [object], {
 			get __init__ () {return __get__ (this, function (self, canvas) {
 				self.keyboard = Keyboard ();
@@ -39,6 +72,8 @@
 				self.asteroids = list ([]);
 				self.setup ();
 				self.last_frame = now ();
+				logging.warning (document.getElementById ('FPS'));
+				self.fps_counter = FPSCounter (document.getElementById ('FPS'));
 			});},
 			get create_controls () {return __get__ (this, function (self) {
 				self.keyboard.add_handler ('spin', ControlAxis ('ArrowRight', 'ArrowLeft', __kwargtrans__ ({attack: 1, decay: 0.6})));
@@ -86,21 +121,9 @@
 				}
 				requestAnimationFrame (self.tick);
 				var t = (now () - self.last_frame) / 1000.0;
+				self.fps_counter.py_update (t);
 				self.keyboard.py_update (t);
-				if (self.keyboard.get_axis ('fire') >= 1) {
-					var mo = three.Vector3 ().copy (self.ship.momentum).multiplyScalar (t);
-					self.fire (self.ship.position, self.ship.heading, mo);
-					self.keyboard.py_clear ('fire');
-				}
-				var spin = self.keyboard.get_axis ('spin');
-				self.ship.spin (spin * t);
-				var thrust = self.keyboard.get_axis ('thrust');
-				self.ship.thrust (thrust * t);
-				if (self.keyboard.get_axis ('fire') >= 1) {
-					var mo = three.Vector3 ().copy (self.ship.momentum).multiplyScalar (t);
-					self.fire (self.geo.position, self.heading, mo);
-					self.keyboard.py_clear ('fire');
-				}
+				self.handle_input (t);
 				var dead = list ([]);
 				for (var b of self.bullets) {
 					if (b.position.z < 1000) {
@@ -142,6 +165,17 @@
 				}
 				self.graphics.render ();
 				self.last_frame = now ();
+			});},
+			get handle_input () {return __get__ (this, function (self, t) {
+				if (self.keyboard.get_axis ('fire') >= 1) {
+					var mo = three.Vector3 ().copy (self.ship.momentum).multiplyScalar (t);
+					self.fire (self.ship.position, self.ship.heading, mo);
+					self.keyboard.py_clear ('fire');
+				}
+				var spin = self.keyboard.get_axis ('spin');
+				self.ship.spin (spin * t);
+				var thrust = self.keyboard.get_axis ('thrust');
+				self.ship.thrust (thrust * t);
 			});},
 			get fire () {return __get__ (this, function (self, pos, vector, momentum, t) {
 				for (var each_bullet of self.bullets) {
@@ -189,6 +223,7 @@
 		game.tick ();
 		__pragma__ ('<use>' +
 			'controls' +
+			'logging' +
 			'org.threejs' +
 			'random' +
 			'units' +
@@ -200,6 +235,7 @@
 			__all__.ControlAxis = ControlAxis;
 			__all__.Event = Event;
 			__all__.EventQueue = EventQueue;
+			__all__.FPSCounter = FPSCounter;
 			__all__.Game = Game;
 			__all__.Graphics = Graphics;
 			__all__.Keyboard = Keyboard;
@@ -208,6 +244,7 @@
 			__all__.game = game;
 			__all__.now = now;
 			__all__.pad_wrap = pad_wrap;
+			__all__.set_element = set_element;
 			__all__.wrap = wrap;
 		__pragma__ ('</all>')
 	}) ();
