@@ -87,6 +87,20 @@
 				requestAnimationFrame (self.tick);
 				var t = (now () - self.last_frame) / 1000.0;
 				self.keyboard.py_update (t);
+				if (self.keyboard.get_axis ('fire') >= 1) {
+					var mo = three.Vector3 ().copy (self.ship.momentum).multiplyScalar (t);
+					self.fire (self.ship.position, self.ship.heading, mo);
+					self.keyboard.py_clear ('fire');
+				}
+				var spin = self.keyboard.get_axis ('spin');
+				self.ship.spin (spin * t);
+				var thrust = self.keyboard.get_axis ('thrust');
+				self.ship.thrust (thrust * t);
+				if (self.keyboard.get_axis ('fire') >= 1) {
+					var mo = three.Vector3 ().copy (self.ship.momentum).multiplyScalar (t);
+					self.fire (self.geo.position, self.heading, mo);
+					self.keyboard.py_clear ('fire');
+				}
 				var dead = list ([]);
 				for (var b of self.bullets) {
 					if (b.position.z < 1000) {

@@ -1,5 +1,5 @@
 "use strict";
-// Transcrypt'ed from Python, 2017-06-06 22:59:29
+// Transcrypt'ed from Python, 2017-06-06 23:24:58
 function pysteroids () {
    var __symbols__ = ['__py3.6__', '__esv6__'];
     var __all__ = {};
@@ -3359,7 +3359,7 @@ function pysteroids () {
 					Object.defineProperty (Unit, 'position', property.call (Unit, Unit.get_position));;
 					var Ship = __class__ ('Ship', [Unit], {
 						ROTATE_SPEED: 2.1,
-						THRUST: 0.075,
+						THRUST: 45,
 						get __init__ () {return __get__ (this, function (self, keyboard, game) {
 							Unit.__init__ (self);
 							self.keyboard = keyboard;
@@ -3373,24 +3373,21 @@ function pysteroids () {
 							self.bbox = AABB (2, 2, self.geo.position);
 							self.game = game;
 						});},
+						get thrust () {return __get__ (this, function (self, amt) {
+							var thrust_amt = amt * self.THRUST;
+							self.momentum = self.momentum.add (self.heading.multiplyScalar (thrust_amt));
+							self.exhaust.visible = amt > 0;
+						});},
+						get spin () {return __get__ (this, function (self, amt) {
+							self.geo.rotateZ ((amt * self.ROTATE_SPEED) * -(1));
+						});},
 						get py_update () {return __get__ (this, function (self, t) {
-							var thrust = self.keyboard.get_axis ('thrust');
-							self.geo.rotateZ (((self.keyboard.get_axis ('spin') * self.ROTATE_SPEED) * t) * -(1));
-							if (thrust > 0) {
-								var thrust_amt = thrust * self.THRUST;
-								self.momentum = self.momentum.add (self.heading.multiplyScalar (thrust_amt));
-							}
 							Unit.py_update (self, t);
-							self.exhaust.visible = thrust > 0;
-							if (self.keyboard.get_axis ('fire') >= 1) {
-								var mo = three.Vector3 ().copy (self.momentum).multiplyScalar (t);
-								self.game.fire (self.geo.position, self.heading, mo);
-								self.keyboard.py_clear ('fire');
-							}
 							self.bbox.py_update (self.position);
 						});},
 						get get_heading () {return __get__ (this, function (self) {
-							return three.Vector3 (self.geo.matrixWorld.elements [4], self.geo.matrixWorld.elements [5], self.geo.matrixWorld.elements [6]);
+							var m = self.geo.matrixWorld.elements;
+							return three.Vector3 (m [4], m [5], m [6]);
 						});}
 					});
 					Object.defineProperty (Ship, 'heading', property.call (Ship, Ship.get_heading));;
@@ -3630,6 +3627,20 @@ function pysteroids () {
 				requestAnimationFrame (self.tick);
 				var t = (now () - self.last_frame) / 1000.0;
 				self.keyboard.py_update (t);
+				if (self.keyboard.get_axis ('fire') >= 1) {
+					var mo = three.Vector3 ().copy (self.ship.momentum).multiplyScalar (t);
+					self.fire (self.ship.position, self.ship.heading, mo);
+					self.keyboard.py_clear ('fire');
+				}
+				var spin = self.keyboard.get_axis ('spin');
+				self.ship.spin (spin * t);
+				var thrust = self.keyboard.get_axis ('thrust');
+				self.ship.thrust (thrust * t);
+				if (self.keyboard.get_axis ('fire') >= 1) {
+					var mo = three.Vector3 ().copy (self.ship.momentum).multiplyScalar (t);
+					self.fire (self.geo.position, self.heading, mo);
+					self.keyboard.py_clear ('fire');
+				}
 				var dead = list ([]);
 				for (var b of self.bullets) {
 					if (b.position.z < 1000) {

@@ -89,6 +89,10 @@ class Game:
         t = (now() - self.last_frame) / 1000.0
         self.keyboard.update(t)
 
+        # controls
+        self.handle_input(t)
+
+
         # clean up bullets, check for collisions
         dead = []
         for b in self.bullets:
@@ -125,6 +129,20 @@ class Game:
 
         self.graphics.render()
         self.last_frame = now()
+
+    def handle_input(self, t):
+
+        if self.keyboard.get_axis('fire') >= 1:
+            mo = three.Vector3().copy(self.ship.momentum).multiplyScalar(t)
+            self.fire(self.ship.position, self.ship.heading, mo)
+            self.keyboard.clear('fire')
+
+        spin = self.keyboard.get_axis('spin')
+        self.ship.spin(spin * t)
+
+        thrust = self.keyboard.get_axis('thrust')
+        self.ship.thrust(thrust * t)
+
 
     def fire(self, pos, vector, momentum, t):
         for each_bullet in self.bullets:
