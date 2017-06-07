@@ -54,14 +54,19 @@ class Game:
             return 1
 
         for a in range(10):
-            x = random.randint(-30,30)
-            y = random.randint(-30,30)
+            x = random.random() - 0.5
+            y = random.random() - 0.5
             z = 0
-            r = (random.random() + 1.0) * 2.5
-            asteroid = Asteroid(r, three.Vector3(x, y, z))
+            offset = three.Vector3(x, y, z)
+            offset.normalize();
+            push = random.randint(12, 27)
+            offset = offset.multiplyScalar(push)
 
-            mx = 2.0
-            my = 2.0
+            r = (random.random() + 1.0) * 2.5
+            asteroid = Asteroid(r, offset)
+
+            mx = random.random() + random.random() + random.random(2) - 2.0
+            my = random.random() + random.random() + random.random(2) - 2.0
             asteroid.momentum = three.Vector3(mx, my, 0)
 
             self.graphics.add(asteroid)
@@ -71,7 +76,6 @@ class Game:
             bullet = Bullet()
             self.graphics.add(bullet)
             self.bullets.append(bullet)
-
 
     def tick(self):
 
@@ -102,10 +106,10 @@ class Game:
                 new_asteroids = random.randint(2, 5)
                 for n in range(new_asteroids):
                     new_a = Asteroid((d.radius + 1.0) / new_asteroids, d.position)
-                    xr = random.random()
-                    yr = random.random()
+                    mx = random.random() + random.random(3) - 2.0
+                    my = random.random() + random.random(3) - 2.0
                     new_a.momentum = three.Vector3().copy(d.momentum)
-                    new_a.momentum.add( three.Vector3(xr, yr, 0))
+                    new_a.momentum.add(three.Vector3(mx, my, 0))
                     self.graphics.add(new_a)
                     self.asteroids.append(new_a)
 

@@ -57,13 +57,17 @@
 					return 1;
 				};
 				for (var a = 0; a < 10; a++) {
-					var x = random.randint (-(30), 30);
-					var y = random.randint (-(30), 30);
+					var x = random.random () - 0.5;
+					var y = random.random () - 0.5;
 					var z = 0;
+					var offset = three.Vector3 (x, y, z);
+					offset.normalize ();
+					var push = random.randint (12, 27);
+					var offset = offset.multiplyScalar (push);
 					var r = (random.random () + 1.0) * 2.5;
-					var asteroid = Asteroid (r, three.Vector3 (x, y, z));
-					var mx = 2.0;
-					var my = 2.0;
+					var asteroid = Asteroid (r, offset);
+					var mx = ((random.random () + random.random ()) + random.random (2)) - 2.0;
+					var my = ((random.random () + random.random ()) + random.random (2)) - 2.0;
 					asteroid.momentum = three.Vector3 (mx, my, 0);
 					self.graphics.add (asteroid);
 					self.asteroids.append (asteroid);
@@ -104,10 +108,10 @@
 						var new_asteroids = random.randint (2, 5);
 						for (var n = 0; n < new_asteroids; n++) {
 							var new_a = Asteroid ((d.radius + 1.0) / new_asteroids, d.position);
-							var xr = random.random ();
-							var yr = random.random ();
+							var mx = (random.random () + random.random (3)) - 2.0;
+							var my = (random.random () + random.random (3)) - 2.0;
 							new_a.momentum = three.Vector3 ().copy (d.momentum);
-							new_a.momentum.add (three.Vector3 (xr, yr, 0));
+							new_a.momentum.add (three.Vector3 (mx, my, 0));
 							self.graphics.add (new_a);
 							self.asteroids.append (new_a);
 						}
