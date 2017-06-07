@@ -1,6 +1,5 @@
 from org import threejs as three
 
-
 def pad_wrap(min, max, val):
     if val < min:
         return max
@@ -53,3 +52,31 @@ class AABB:
 
     def update(self, pos):
         self.position = pos
+
+
+class FPSCounter:
+
+    def __init__(self, hud_element):
+        self.frames = [0.1]
+        for n in range(99):
+            self.frames.append(0.1)
+        self.next_frame = 0
+        self.average = 0
+        self.visible = True
+        self.element = hud_element
+
+    def update(self, t):
+        self.frames[self.next_frame] = t
+        self.next_frame +=1
+        if self.next_frame > 99:
+            self.next_frame = 0
+
+        sum = lambda a, b: a + b
+        total = 0
+        for n in range(100):
+            total += self.frames[n]
+
+        self.average = total * 10
+        if self.visible:
+            # @todo: need a string formatting option to print out decimal MS
+            self.element.innerHTML = "{} fps".format(int(1000 / self.average))

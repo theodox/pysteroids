@@ -1,10 +1,10 @@
+import logging
 import random
 
 import org.threejs as three
 from controls import Keyboard, ControlAxis
 from units import Ship, Asteroid, Bullet
-from utils import wrap, now, pad_wrap, set_element
-import  logging
+from utils import wrap, now, FPSCounter
 
 
 class Graphics:
@@ -24,34 +24,6 @@ class Graphics:
 
     def add(self, item):
         self.scene.add(item.geo)
-
-
-class FPSCounter:
-
-    def __init__(self, hud_element):
-        self.frames = [0.1]
-        for n in range(99):
-            self.frames.append(0.1)
-        self.next_frame = 0
-        self.average = 0
-        self.visible = True
-        self.element = hud_element
-
-    def update(self, t):
-        self.frames[self.next_frame] = t
-        self.next_frame +=1
-        if self.next_frame > 99:
-            self.next_frame = 0
-
-        sum = lambda a, b: a + b
-        total = 0
-        for n in range(100):
-            total += self.frames[n]
-
-        self.average = total * 10
-        if self.visible:
-            # @todo: need a string formatting option to print out decimal MS
-            self.element.innerHTML = "{} fps".format(int(1000 / self.average))
 
 
 class Game:
