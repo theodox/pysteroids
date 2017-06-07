@@ -1,8 +1,8 @@
 {
 	"version": 3,
-	"file": "/Users/stevet/prj/trans/__javascript__/utils.mod.js",
+	"file": "/Users/stevet/prj/pysteroids/__javascript__/utils.mod.js",
 	"sources": [
-		"/Users/stevet/prj/trans/utils.py"
+		"/Users/stevet/prj/pysteroids/utils.py"
 	],
 	"sourcesContent": [
 		"from org import threejs as three\n\n\ndef pad_wrap(min, max, val):\n    if val < min:\n        return max\n    if val > max:\n        return min\n    return val\n\n\ndef wrap(obj: three.Object3d):\n    WRAP = 30\n    NWRAP = -30\n    x, y, z = obj.position.x, obj.position.y, obj.position.z\n    x = pad_wrap(NWRAP, WRAP, x)\n    y = pad_wrap(NWRAP, WRAP, y)\n    obj.position.set(x, y, z)\n\n\ndef clamp(val, low, high):\n    return max(min(val, high), low)\n\n\ndef sign(val):\n    if val > 0:\n        return 1\n    if val < 0:\n        return -1\n    return 0\n\n\ndef now():\n    return __new__(Date)\n\n\ndef set_element(id, value):\n    document.getElementById(id).innerHTML = value\n\n\nclass AABB:\n    def __init__(self, width, height, center):\n        self.hw = width / 2.0\n        self.hh = width / 2.0\n        self.position = center\n\n    def contains(self, item):\n        x = self.position.x\n        y = self.position.y\n        h = self.hh\n        w = self.hw\n        return item.x > x - w and item.x < x + w and item.y > y - h and item.y < y + h\n\n    def update(self, pos):\n        self.position = pos\n"

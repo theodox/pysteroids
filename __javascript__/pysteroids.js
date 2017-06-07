@@ -1,5 +1,5 @@
 "use strict";
-// Transcrypt'ed from Python, 2017-06-06 22:43:12
+// Transcrypt'ed from Python, 2017-06-06 22:59:29
 function pysteroids () {
    var __symbols__ = ['__py3.6__', '__esv6__'];
     var __all__ = {};
@@ -209,7 +209,7 @@ function pysteroids () {
 						get __init__ () {return __get__ (this, function (self) {
 							self.interpreter_name = 'python';
 							self.transpiler_name = 'transcrypt';
-							self.transpiler_version = '3.6.25';
+							self.transpiler_version = '3.6.26';
 							self.target_subdir = '__javascript__';
 						});}
 					});
@@ -3584,9 +3584,9 @@ function pysteroids () {
 				self.last_frame = now ();
 			});},
 			get create_controls () {return __get__ (this, function (self) {
-				self.keyboard.add_handler ('spin', ControlAxis ('s', 'a', __kwargtrans__ ({attack: 1, decay: 0.6})));
-				self.keyboard.add_handler ('thrust', ControlAxis ('w', 'z', __kwargtrans__ ({attack: 0.75, decay: 2, deadzone: 0.1})));
-				self.keyboard.add_handler ('fire', ControlAxis ('q', 'b', __kwargtrans__ ({attack: 10})));
+				self.keyboard.add_handler ('spin', ControlAxis ('ArrowRight', 'ArrowLeft', __kwargtrans__ ({attack: 1, decay: 0.6})));
+				self.keyboard.add_handler ('thrust', ControlAxis ('ArrowUp', 'ArrowDown', __kwargtrans__ ({attack: 0.75, decay: 2, deadzone: 0.1})));
+				self.keyboard.add_handler ('fire', ControlAxis (' ', 'None', __kwargtrans__ ({attack: 10})));
 				document.onkeydown = self.keyboard.key_down;
 				document.onkeyup = self.keyboard.key_up;
 			});},

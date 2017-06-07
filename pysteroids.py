@@ -37,9 +37,9 @@ class Game:
         self.last_frame = now()
 
     def create_controls(self):
-        self.keyboard.add_handler('spin', ControlAxis('s', 'a', attack=1, decay=.6))
-        self.keyboard.add_handler('thrust', ControlAxis('w', 'z', attack=.75, decay=2, deadzone=.1))
-        self.keyboard.add_handler('fire', ControlAxis('q', 'b', attack=10))
+        self.keyboard.add_handler('spin', ControlAxis('ArrowRight', 'ArrowLeft', attack=1, decay=.6))
+        self.keyboard.add_handler('thrust', ControlAxis('ArrowUp', 'ArrowDown', attack=.75, decay=2, deadzone=.1))
+        self.keyboard.add_handler('fire', ControlAxis(' ', 'None', attack=10))
         document.onkeydown = self.keyboard.key_down
         document.onkeyup = self.keyboard.key_up
 
