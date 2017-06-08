@@ -15,14 +15,16 @@
 						return val;
 					};
 					var wrap = function (obj) {
-						var WRAP = 30;
-						var NWRAP = -(30);
+						var XWRAP = 70;
+						var XNWRAP = -(70);
+						var YWRAP = 35;
+						var YNWRAP = -(35);
 						var __left0__ = tuple ([obj.position.x, obj.position.y, obj.position.z]);
 						var x = __left0__ [0];
 						var y = __left0__ [1];
 						var z = __left0__ [2];
-						var x = pad_wrap (NWRAP, WRAP, x);
-						var y = pad_wrap (NWRAP, WRAP, y);
+						var x = pad_wrap (XNWRAP, XWRAP, x);
+						var y = pad_wrap (YNWRAP, YWRAP, y);
 						obj.position.set (x, y, z);
 					};
 					var clamp = function (val, low, high) {

@@ -1,5 +1,5 @@
 "use strict";
-// Transcrypt'ed from Python, 2017-06-07 23:39:56
+// Transcrypt'ed from Python, 2017-06-08 00:03:28
 function pysteroids () {
    var __symbols__ = ['__py3.6__', '__esv6__'];
     var __all__ = {};
@@ -6983,14 +6983,16 @@ function pysteroids () {
 						return val;
 					};
 					var wrap = function (obj) {
-						var WRAP = 30;
-						var NWRAP = -(30);
+						var XWRAP = 70;
+						var XNWRAP = -(70);
+						var YWRAP = 35;
+						var YNWRAP = -(35);
 						var __left0__ = tuple ([obj.position.x, obj.position.y, obj.position.z]);
 						var x = __left0__ [0];
 						var y = __left0__ [1];
 						var z = __left0__ [2];
-						var x = pad_wrap (NWRAP, WRAP, x);
-						var y = pad_wrap (NWRAP, WRAP, y);
+						var x = pad_wrap (XNWRAP, XWRAP, x);
+						var y = pad_wrap (YNWRAP, YWRAP, y);
 						obj.position.set (x, y, z);
 					};
 					var clamp = function (val, low, high) {
@@ -7616,11 +7618,11 @@ function pysteroids () {
 		var FPSCounter = __init__ (__world__.utils).FPSCounter;
 		var Graphics = __class__ ('Graphics', [object], {
 			get __init__ () {return __get__ (this, function (self, w, h, canvas) {
-				self.width = w;
-				self.height = h;
+				self.width = float (w);
+				self.height = float (h);
 				self.scene = three.Scene ();
-				self.camera = three.PerspectiveCamera (70, self.width / self.height, 1, 500);
-				self.camera.position.set (0, 0, 50);
+				self.camera = three.PerspectiveCamera (53.13, self.width / self.height, 1, 500);
+				self.camera.position.set (0, 0, 80);
 				self.camera.lookAt (self.scene.position);
 				self.renderer = three.WebGLRenderer (dict ({'Antialias': true}));
 				self.renderer.setSize (self.width, self.height);
@@ -7636,7 +7638,7 @@ function pysteroids () {
 		var Game = __class__ ('Game', [object], {
 			get __init__ () {return __get__ (this, function (self, canvas) {
 				self.keyboard = Keyboard ();
-				self.graphics = Graphics (window.innerWidth - 20, window.innerHeight - 20, canvas);
+				self.graphics = Graphics (window.innerWidth - 32, window.innerHeight - 32, canvas);
 				self.create_controls ();
 				self.ship = null;
 				self.bullets = list ([]);
@@ -7665,13 +7667,13 @@ function pysteroids () {
 					}
 					return 1;
 				};
-				for (var a = 0; a < 10; a++) {
-					var x = random.random () - 0.5;
+				for (var a = 0; a < 8; a++) {
+					var x = (random.random () - 0.5) * 2;
 					var y = random.random () - 0.5;
 					var z = 0;
 					var offset = three.Vector3 (x, y, z);
 					offset.normalize ();
-					var push = random.randint (12, 27);
+					var push = random.randint (20, 60);
 					var offset = offset.multiplyScalar (push);
 					var r = (random.random () + 1.0) * 2.5;
 					var asteroid = Asteroid (r, offset);
@@ -7718,8 +7720,8 @@ function pysteroids () {
 						var new_asteroids = random.randint (2, 5);
 						for (var n = 0; n < new_asteroids; n++) {
 							var new_a = Asteroid ((d.radius + 1.0) / new_asteroids, d.position);
-							var mx = (random.random () + random.random (3)) - 2.0;
-							var my = (random.random () + random.random (3)) - 2.0;
+							var mx = (random.random () - 0.5) * 6;
+							var my = (random.random () - 0.5) * 4;
 							new_a.momentum = three.Vector3 ().copy (d.momentum);
 							new_a.momentum.add (three.Vector3 (mx, my, 0));
 							self.graphics.add (new_a);

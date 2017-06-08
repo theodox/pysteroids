@@ -9,11 +9,11 @@ from utils import wrap, now, FPSCounter
 
 class Graphics:
     def __init__(self, w, h, canvas):
-        self.width = w
-        self.height = h
+        self.width = float(w)
+        self.height = float(h)
         self.scene = three.Scene()
-        self.camera = three.PerspectiveCamera(70, self.width / self.height, 1, 500)
-        self.camera.position.set(0, 0, 50)
+        self.camera = three.PerspectiveCamera(53.13, self.width / self.height, 1, 500)
+        self.camera.position.set(0, 0, 80)
         self.camera.lookAt(self.scene.position)
         self.renderer = three.WebGLRenderer({'Antialias': True})
         self.renderer.setSize(self.width, self.height)
@@ -29,7 +29,7 @@ class Graphics:
 class Game:
     def __init__(self, canvas):
         self.keyboard = Keyboard()
-        self.graphics = Graphics(window.innerWidth - 20, window.innerHeight - 20, canvas)
+        self.graphics = Graphics(window.innerWidth - 32, window.innerHeight - 32, canvas)
         self.create_controls()
         self.ship = None
         self.bullets = []
@@ -61,13 +61,13 @@ class Game:
                 return -1
             return 1
 
-        for a in range(10):
-            x = random.random() - 0.5
+        for a in range(8):
+            x = (random.random() - 0.5) * 2
             y = random.random() - 0.5
             z = 0
             offset = three.Vector3(x, y, z)
             offset.normalize();
-            push = random.randint(12, 27)
+            push = random.randint(20, 60)
             offset = offset.multiplyScalar(push)
 
             r = (random.random() + 1.0) * 2.5
@@ -118,8 +118,8 @@ class Game:
                 new_asteroids = random.randint(2, 5)
                 for n in range(new_asteroids):
                     new_a = Asteroid((d.radius + 1.0) / new_asteroids, d.position)
-                    mx = random.random() + random.random(3) - 2.0
-                    my = random.random() + random.random(3) - 2.0
+                    mx = (random.random() - 0.5) * 6
+                    my = (random.random() - 0.5) * 4
                     new_a.momentum = three.Vector3().copy(d.momentum)
                     new_a.momentum.add(three.Vector3(mx, my, 0))
                     self.graphics.add(new_a)

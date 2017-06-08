@@ -9,11 +9,14 @@ def pad_wrap(min, max, val):
 
 
 def wrap(obj: three.Object3d):
-    WRAP = 30
-    NWRAP = -30
+    XWRAP = 70
+    XNWRAP = -70
+    YWRAP = 35
+    YNWRAP = -35
+
     x, y, z = obj.position.x, obj.position.y, obj.position.z
-    x = pad_wrap(NWRAP, WRAP, x)
-    y = pad_wrap(NWRAP, WRAP, y)
+    x = pad_wrap(XNWRAP, XWRAP, x)
+    y = pad_wrap(YNWRAP, YWRAP, y)
     obj.position.set(x, y, z)
 
 
