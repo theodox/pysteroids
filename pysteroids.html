@@ -1,25 +1,59 @@
 <html>
 <head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Bungee+Hairline" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Play" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
 </head>
 <style>
+h1, h2, h3 {
+font-family: 'Bungee Hairline', cursive;
+ }
+
+ h1 {
+ font-size: 500%;
+ }
+    #frame{
+        margin: 0 auto;
+        width: 80%;
+    }
+
     #title { position: absolute;
     left: 32px;
     top: 32px;
     color: #AAAAAA;
     }
+
     #FPS { position: absolute;
     left: 32px;
     top: 64px;
     color: #AAAAAA;
     }
+
+    #game_over {
+    position: relative;
+    margin 100 auto;
+    color: #AAAAAA;
+    z-index: -10;
+    text-align: center;
+    vertical-align: text-center;
+
+    }
+
+    #game_canvas{
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 100%;
+    }
+
 </style>
 <body>
 <div id="frame">
-    <div id="game_canvas">THREE</div>
+    <div id="game_canvas"></div>
     <h2 id="title">Pysteroids</h2>
-    <h3 id="FPS">999</h3>
-    <div id="ZZ" po>THREE</div>
+    <h3 id="FPS"></h3>
+    <h1 id="game_over">GAME OVER</h1>
+
 
 </div>
 

@@ -29,7 +29,7 @@ class Graphics:
 class Game:
     def __init__(self, canvas):
         self.keyboard = Keyboard()
-        self.graphics = Graphics(window.innerWidth, window.innerHeight, canvas)
+        self.graphics = Graphics(window.innerWidth - 20, window.innerHeight - 20, canvas)
         self.create_controls()
         self.ship = None
         self.bullets = []
@@ -39,6 +39,10 @@ class Game:
         logging.warning(document.getElementById("FPS"))
         self.fps_counter = FPSCounter(document.getElementById("FPS"))
 
+        # adjust the position of the game over div
+        v_center = (window.innerHeight - 120) / 2.0
+        title = document.getElementById("game_over")
+        title.style.top = v_center
 
     def create_controls(self):
         self.keyboard.add_handler('spin', ControlAxis('ArrowRight', 'ArrowLeft', attack=1, decay=.6))
@@ -84,10 +88,8 @@ class Game:
     def tick(self):
 
         if len(self.asteroids) == 0:
-            print("GAME OVER")
-            document.getElementById("ZZ").innerHTML = "<h1>GAME OVER</h1>"
+            document.getElementById("game_over").style.zIndex = 10
             return
-
 
         requestAnimationFrame(self.tick)
 
@@ -98,7 +100,6 @@ class Game:
 
         # controls
         self.handle_input(t)
-
 
         # clean up bullets, check for collisions
         dead = []
@@ -150,7 +151,6 @@ class Game:
         thrust = self.keyboard.get_axis('thrust')
         self.ship.thrust(thrust * t)
 
-
     def fire(self, pos, vector, momentum, t):
         for each_bullet in self.bullets:
             if each_bullet.geo.position.z >= 1000:
@@ -159,33 +159,6 @@ class Game:
                 each_bullet.lifespan = 0
                 each_bullet.momentum = three.Vector3().copy(momentum).multiplyScalar(.66)
                 return
-
-
-class EventQueue:
-    def __init__(self):
-        self.events = {}
-
-    def add_event(self, name, event):
-        self.events[name] = event
-
-    def remove_event(self, name):
-        self.events.pop(name, None)
-
-
-class Event:
-    def __init__(self, name):
-        self.name = name
-        self.handlers = {}
-
-    def subscribe(self, name, handler):
-        self.handlers[name] = handler
-
-    def unsubscribe(self, name):
-        self.handlers.pop(name, None)
-
-    def fire(self, *args):
-        for k, v in self.handlers.items():
-            v(*args)
 
 
 canvas = document.getElementById("game_canvas")

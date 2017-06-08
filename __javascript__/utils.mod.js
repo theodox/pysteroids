@@ -60,11 +60,42 @@
 							self.position = pos;
 						});}
 					});
+					var FPSCounter = __class__ ('FPSCounter', [object], {
+						get __init__ () {return __get__ (this, function (self, hud_element) {
+							self.frames = list ([0.1]);
+							for (var n = 0; n < 99; n++) {
+								self.frames.append (0.1);
+							}
+							self.next_frame = 0;
+							self.average = 0;
+							self.visible = true;
+							self.element = hud_element;
+						});},
+						get py_update () {return __get__ (this, function (self, t) {
+							self.frames [self.next_frame] = t;
+							self.next_frame++;
+							if (self.next_frame > 99) {
+								self.next_frame = 0;
+							}
+							var sum = (function __lambda__ (a, b) {
+								return a + b;
+							});
+							var total = 0;
+							for (var n = 0; n < 100; n++) {
+								total += self.frames [n];
+							}
+							self.average = total * 10;
+							if (self.visible) {
+								self.element.innerHTML = '{} fps'.format (int (1000 / self.average));
+							}
+						});}
+					});
 					__pragma__ ('<use>' +
 						'org.threejs' +
 					'</use>')
 					__pragma__ ('<all>')
 						__all__.AABB = AABB;
+						__all__.FPSCounter = FPSCounter;
 						__all__.clamp = clamp;
 						__all__.now = now;
 						__all__.pad_wrap = pad_wrap;

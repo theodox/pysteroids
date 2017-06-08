@@ -1,5 +1,5 @@
 "use strict";
-// Transcrypt'ed from Python, 2017-06-07 00:10:55
+// Transcrypt'ed from Python, 2017-06-07 23:39:56
 function pysteroids () {
    var __symbols__ = ['__py3.6__', '__esv6__'];
     var __all__ = {};
@@ -209,7 +209,7 @@ function pysteroids () {
 						get __init__ () {return __get__ (this, function (self) {
 							self.interpreter_name = 'python';
 							self.transpiler_name = 'transcrypt';
-							self.transpiler_version = '3.6.26';
+							self.transpiler_version = '3.6.25';
 							self.target_subdir = '__javascript__';
 						});}
 					});
@@ -7028,11 +7028,42 @@ function pysteroids () {
 							self.position = pos;
 						});}
 					});
+					var FPSCounter = __class__ ('FPSCounter', [object], {
+						get __init__ () {return __get__ (this, function (self, hud_element) {
+							self.frames = list ([0.1]);
+							for (var n = 0; n < 99; n++) {
+								self.frames.append (0.1);
+							}
+							self.next_frame = 0;
+							self.average = 0;
+							self.visible = true;
+							self.element = hud_element;
+						});},
+						get py_update () {return __get__ (this, function (self, t) {
+							self.frames [self.next_frame] = t;
+							self.next_frame++;
+							if (self.next_frame > 99) {
+								self.next_frame = 0;
+							}
+							var sum = (function __lambda__ (a, b) {
+								return a + b;
+							});
+							var total = 0;
+							for (var n = 0; n < 100; n++) {
+								total += self.frames [n];
+							}
+							self.average = total * 10;
+							if (self.visible) {
+								self.element.innerHTML = '{} fps'.format (int (1000 / self.average));
+							}
+						});}
+					});
 					__pragma__ ('<use>' +
 						'org.threejs' +
 					'</use>')
 					__pragma__ ('<all>')
 						__all__.AABB = AABB;
+						__all__.FPSCounter = FPSCounter;
 						__all__.clamp = clamp;
 						__all__.now = now;
 						__all__.pad_wrap = pad_wrap;
@@ -7572,6 +7603,7 @@ function pysteroids () {
 	(function () {
 		var logging = {};
 		var random = {};
+		__nest__ (logging, '', __init__ (__world__.logging));
 		__nest__ (random, '', __init__ (__world__.random));
 		var three =  __init__ (__world__.org.threejs);
 		var Keyboard = __init__ (__world__.controls).Keyboard;
@@ -7581,9 +7613,7 @@ function pysteroids () {
 		var Bullet = __init__ (__world__.units).Bullet;
 		var wrap = __init__ (__world__.utils).wrap;
 		var now = __init__ (__world__.utils).now;
-		var pad_wrap = __init__ (__world__.utils).pad_wrap;
-		var set_element = __init__ (__world__.utils).set_element;
-		__nest__ (logging, '', __init__ (__world__.logging));
+		var FPSCounter = __init__ (__world__.utils).FPSCounter;
 		var Graphics = __class__ ('Graphics', [object], {
 			get __init__ () {return __get__ (this, function (self, w, h, canvas) {
 				self.width = w;
@@ -7603,40 +7633,10 @@ function pysteroids () {
 				self.scene.add (item.geo);
 			});}
 		});
-		var FPSCounter = __class__ ('FPSCounter', [object], {
-			get __init__ () {return __get__ (this, function (self, hud_element) {
-				self.frames = list ([0.1]);
-				for (var n = 0; n < 99; n++) {
-					self.frames.append (0.1);
-				}
-				self.next_frame = 0;
-				self.average = 0;
-				self.visible = true;
-				self.element = hud_element;
-			});},
-			get py_update () {return __get__ (this, function (self, t) {
-				self.frames [self.next_frame] = t;
-				self.next_frame++;
-				if (self.next_frame > 99) {
-					self.next_frame = 0;
-				}
-				var sum = (function __lambda__ (a, b) {
-					return a + b;
-				});
-				var total = 0;
-				for (var n = 0; n < 100; n++) {
-					total += self.frames [n];
-				}
-				self.average = total * 10;
-				if (self.visible) {
-					self.element.innerHTML = '{} fps'.format (int (1000 / self.average));
-				}
-			});}
-		});
 		var Game = __class__ ('Game', [object], {
 			get __init__ () {return __get__ (this, function (self, canvas) {
 				self.keyboard = Keyboard ();
-				self.graphics = Graphics (window.innerWidth, window.innerHeight, canvas);
+				self.graphics = Graphics (window.innerWidth - 20, window.innerHeight - 20, canvas);
 				self.create_controls ();
 				self.ship = null;
 				self.bullets = list ([]);
@@ -7645,6 +7645,9 @@ function pysteroids () {
 				self.last_frame = now ();
 				logging.warning (document.getElementById ('FPS'));
 				self.fps_counter = FPSCounter (document.getElementById ('FPS'));
+				var v_center = (window.innerHeight - 120) / 2.0;
+				var title = document.getElementById ('game_over');
+				title.style.top = v_center;
 			});},
 			get create_controls () {return __get__ (this, function (self) {
 				self.keyboard.add_handler ('spin', ControlAxis ('ArrowRight', 'ArrowLeft', __kwargtrans__ ({attack: 1, decay: 0.6})));
@@ -7686,8 +7689,7 @@ function pysteroids () {
 			});},
 			get tick () {return __get__ (this, function (self) {
 				if (len (self.asteroids) == 0) {
-					print ('GAME OVER');
-					document.getElementById ('ZZ').innerHTML = '<h1>GAME OVER</h1>';
+					document.getElementById ('game_over').style.zIndex = 10;
 					return ;
 				}
 				requestAnimationFrame (self.tick);
@@ -7760,35 +7762,6 @@ function pysteroids () {
 				}
 			});}
 		});
-		var EventQueue = __class__ ('EventQueue', [object], {
-			get __init__ () {return __get__ (this, function (self) {
-				self.events = dict ({});
-			});},
-			get add_event () {return __get__ (this, function (self, py_name, event) {
-				self.events [py_name] = event;
-			});},
-			get remove_event () {return __get__ (this, function (self, py_name) {
-				self.events.py_pop (py_name, null);
-			});}
-		});
-		var Event = __class__ ('Event', [object], {
-			get __init__ () {return __get__ (this, function (self, py_name) {
-				self.py_name = py_name;
-				self.handlers = dict ({});
-			});},
-			get subscribe () {return __get__ (this, function (self, py_name, handler) {
-				self.handlers [py_name] = handler;
-			});},
-			get unsubscribe () {return __get__ (this, function (self, py_name) {
-				self.handlers.py_pop (py_name, null);
-			});},
-			get fire () {return __get__ (this, function (self) {
-				var args = tuple ([].slice.apply (arguments).slice (1));
-				for (var [k, v] of self.handlers.py_items ()) {
-					v (...args);
-				}
-			});}
-		});
 		var canvas = document.getElementById ('game_canvas');
 		var game = Game (canvas);
 		game.tick ();
@@ -7804,8 +7777,6 @@ function pysteroids () {
 			__all__.Asteroid = Asteroid;
 			__all__.Bullet = Bullet;
 			__all__.ControlAxis = ControlAxis;
-			__all__.Event = Event;
-			__all__.EventQueue = EventQueue;
 			__all__.FPSCounter = FPSCounter;
 			__all__.Game = Game;
 			__all__.Graphics = Graphics;
@@ -7814,8 +7785,6 @@ function pysteroids () {
 			__all__.canvas = canvas;
 			__all__.game = game;
 			__all__.now = now;
-			__all__.pad_wrap = pad_wrap;
-			__all__.set_element = set_element;
 			__all__.wrap = wrap;
 		__pragma__ ('</all>')
 	}) ();
