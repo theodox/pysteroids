@@ -1,4 +1,6 @@
 from org import threejs as three
+from org.transcrypt.stubs.browser import __pragma__
+
 
 def pad_wrap(min, max, val):
     if val < min:
@@ -33,7 +35,9 @@ def sign(val):
 
 
 def now():
-    return __new__(Date)
+    """absolute time in decimal seconds"""
+    d = __new__(Date)
+    return d.getTime() / 1000.0
 
 
 def set_element(id, value):
@@ -58,11 +62,10 @@ class AABB:
 
 
 class FPSCounter:
-
     def __init__(self, hud_element):
-        self.frames = [0.1]
+        self.frames = [.1]
         for n in range(99):
-            self.frames.append(0.1)
+            self.frames.append(.1)
         self.next_frame = 0
         self.average = 0
         self.visible = True
@@ -70,7 +73,7 @@ class FPSCounter:
 
     def update(self, t):
         self.frames[self.next_frame] = t
-        self.next_frame +=1
+        self.next_frame += 1
         if self.next_frame > 99:
             self.next_frame = 0
 
@@ -83,3 +86,65 @@ class FPSCounter:
         if self.visible:
             # @todo: need a string formatting option to print out decimal MS
             self.element.innerHTML = "{} fps".format(int(1000 / self.average))
+
+
+def advance(cr, value):
+    """used by coroutines for updating without 'gsend' everywhere"""
+    __pragma__('gsend')
+    cr.send(value)
+    __pragma__('nogsend')
+
+
+def coroutine(loop, callback):
+
+    callback_fn = callback if callback is not None else lambda a: a
+
+    def coroutine_generator():
+        alive = True
+        result = None
+        while alive:
+            next_value = yield
+            alive, result = loop(next_value)
+            yield result
+        yield callback_fn(result)
+
+    cr =  coroutine_generator()
+    cr.advance = lambda a: advance(cr, a)
+    return cr
+
+
+def timer(duration, loop, callback):
+    expires_at = now() + duration
+
+    loop_fn = loop if loop is not None else lambda a: (True, a)
+    callback_fn = callback if callback is not None else lambda a: a
+
+    def timer_coroutine():
+        alive = True
+        result = None
+
+        while alive:
+            next_value = yield
+            alive, result = loop_fn(next_value)
+            alive = alive and now() < expires_at
+            yield result
+        yield callback_fn(result)
+
+    tc = timer_coroutine()
+    tc.advance = lambda a: advance(tc, a)
+    return  tc
+
+
+
+
+    # Context managers don't work'
+    # class TestContext:
+    #
+    #     def __init__(self):
+    #         self.x = True
+    #
+    #     def __enter__(self):
+    #         print ("entering")
+    #
+    #     def __exit__(self, exc_type, exc_val, exc_tb):
+    #         print ("exiting")

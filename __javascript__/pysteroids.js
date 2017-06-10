@@ -1,5 +1,5 @@
 "use strict";
-// Transcrypt'ed from Python, 2017-06-08 00:03:28
+// Transcrypt'ed from Python, 2017-06-10 02:13:40
 function pysteroids () {
    var __symbols__ = ['__py3.6__', '__esv6__'];
     var __all__ = {};
@@ -7008,7 +7008,8 @@ function pysteroids () {
 						return 0;
 					};
 					var now = function () {
-						return new Date;
+						var d = new Date;
+						return d.getTime () / 1000.0;
 					};
 					var set_element = function (id, value) {
 						document.getElementById (id).innerHTML = value;
@@ -7060,18 +7061,73 @@ function pysteroids () {
 							}
 						});}
 					});
+					var advance = function (cr, value) {
+						(function () {return cr.next (value).value}) ();
+					};
+					var coroutine = function (loop, callback) {
+						var callback_fn = (callback !== null ? callback : (function __lambda__ (a) {
+							return a;
+						}));
+						var coroutine_generator = function* () {
+							var alive = true;
+							var result = null;
+							while (alive) {
+								var next_value = yield;
+								var __left0__ = loop (next_value);
+								var alive = __left0__ [0];
+								var result = __left0__ [1];
+								yield result;
+							}
+							yield callback_fn (result);
+						};
+						var cr = coroutine_generator ();
+						cr.advance = (function __lambda__ (a) {
+							return advance (cr, a);
+						});
+						return cr;
+					};
+					var timer = function (duration, loop, callback) {
+						var expires_at = now () + duration;
+						var loop_fn = (loop !== null ? loop : (function __lambda__ (a) {
+							return tuple ([true, a]);
+						}));
+						var callback_fn = (callback !== null ? callback : (function __lambda__ (a) {
+							return a;
+						}));
+						var timer_coroutine = function* () {
+							var alive = true;
+							var result = null;
+							while (alive) {
+								var next_value = yield;
+								var __left0__ = loop_fn (next_value);
+								var alive = __left0__ [0];
+								var result = __left0__ [1];
+								var alive = alive && now () < expires_at;
+								yield result;
+							}
+							yield callback_fn (result);
+						};
+						var tc = timer_coroutine ();
+						tc.advance = (function __lambda__ (a) {
+							return advance (tc, a);
+						});
+						return tc;
+					};
 					__pragma__ ('<use>' +
 						'org.threejs' +
 					'</use>')
 					__pragma__ ('<all>')
 						__all__.AABB = AABB;
 						__all__.FPSCounter = FPSCounter;
+						__all__.advance = advance;
 						__all__.clamp = clamp;
+						__all__.coroutine = coroutine;
 						__all__.now = now;
 						__all__.pad_wrap = pad_wrap;
 						__all__.set_element = set_element;
 						__all__.sign = sign;
 						__all__.three = three;
+						__all__.timer = timer;
 						__all__.wrap = wrap;
 					__pragma__ ('</all>')
 				}
@@ -7616,6 +7672,23 @@ function pysteroids () {
 		var wrap = __init__ (__world__.utils).wrap;
 		var now = __init__ (__world__.utils).now;
 		var FPSCounter = __init__ (__world__.utils).FPSCounter;
+		var timer = __init__ (__world__.utils).timer;
+		var coroutine = __init__ (__world__.utils).coroutine;
+		var DEBUG = true;
+		var logger = logging.getLogger ('root');
+		logger.addHandler (logging.StreamHandler ());
+		if (DEBUG) {
+			logger.setLevel (logging.INFO);
+			logger.info ('====== debug logging on =====');
+		}
+		var waiter = function () {
+			var args = tuple ([].slice.apply (arguments).slice (0));
+			return tuple ([true, args [0]]);
+		};
+		var done = function () {
+			var args = tuple ([].slice.apply (arguments).slice (0));
+			print ('done at', args [0]);
+		};
 		var Graphics = __class__ ('Graphics', [object], {
 			get __init__ () {return __get__ (this, function (self, w, h, canvas) {
 				self.width = float (w);
@@ -7650,6 +7723,9 @@ function pysteroids () {
 				var v_center = (window.innerHeight - 120) / 2.0;
 				var title = document.getElementById ('game_over');
 				title.style.top = v_center;
+				self.timer = timer (1.5, waiter, done);
+				print (self.timer);
+				py_next (self.timer);
 			});},
 			get create_controls () {return __get__ (this, function (self) {
 				self.keyboard.add_handler ('spin', ControlAxis ('ArrowRight', 'ArrowLeft', __kwargtrans__ ({attack: 1, decay: 0.6})));
@@ -7694,8 +7770,10 @@ function pysteroids () {
 					document.getElementById ('game_over').style.zIndex = 10;
 					return ;
 				}
+				var q = self.timer;
 				requestAnimationFrame (self.tick);
-				var t = (now () - self.last_frame) / 1000.0;
+				var t = now () - self.last_frame;
+				q.advance (t);
 				self.fps_counter.py_update (t);
 				self.keyboard.py_update (t);
 				self.handle_input (t);
@@ -7779,14 +7857,20 @@ function pysteroids () {
 			__all__.Asteroid = Asteroid;
 			__all__.Bullet = Bullet;
 			__all__.ControlAxis = ControlAxis;
+			__all__.DEBUG = DEBUG;
 			__all__.FPSCounter = FPSCounter;
 			__all__.Game = Game;
 			__all__.Graphics = Graphics;
 			__all__.Keyboard = Keyboard;
 			__all__.Ship = Ship;
 			__all__.canvas = canvas;
+			__all__.coroutine = coroutine;
+			__all__.done = done;
 			__all__.game = game;
+			__all__.logger = logger;
 			__all__.now = now;
+			__all__.timer = timer;
+			__all__.waiter = waiter;
 			__all__.wrap = wrap;
 		__pragma__ ('</all>')
 	}) ();

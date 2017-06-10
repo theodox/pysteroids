@@ -12,6 +12,23 @@
 		var wrap = __init__ (__world__.utils).wrap;
 		var now = __init__ (__world__.utils).now;
 		var FPSCounter = __init__ (__world__.utils).FPSCounter;
+		var timer = __init__ (__world__.utils).timer;
+		var coroutine = __init__ (__world__.utils).coroutine;
+		var DEBUG = true;
+		var logger = logging.getLogger ('root');
+		logger.addHandler (logging.StreamHandler ());
+		if (DEBUG) {
+			logger.setLevel (logging.INFO);
+			logger.info ('====== debug logging on =====');
+		}
+		var waiter = function () {
+			var args = tuple ([].slice.apply (arguments).slice (0));
+			return tuple ([true, args [0]]);
+		};
+		var done = function () {
+			var args = tuple ([].slice.apply (arguments).slice (0));
+			print ('done at', args [0]);
+		};
 		var Graphics = __class__ ('Graphics', [object], {
 			get __init__ () {return __get__ (this, function (self, w, h, canvas) {
 				self.width = float (w);
@@ -46,6 +63,9 @@
 				var v_center = (window.innerHeight - 120) / 2.0;
 				var title = document.getElementById ('game_over');
 				title.style.top = v_center;
+				self.timer = timer (1.5, waiter, done);
+				print (self.timer);
+				py_next (self.timer);
 			});},
 			get create_controls () {return __get__ (this, function (self) {
 				self.keyboard.add_handler ('spin', ControlAxis ('ArrowRight', 'ArrowLeft', __kwargtrans__ ({attack: 1, decay: 0.6})));
@@ -90,8 +110,10 @@
 					document.getElementById ('game_over').style.zIndex = 10;
 					return ;
 				}
+				var q = self.timer;
 				requestAnimationFrame (self.tick);
-				var t = (now () - self.last_frame) / 1000.0;
+				var t = now () - self.last_frame;
+				q.advance (t);
 				self.fps_counter.py_update (t);
 				self.keyboard.py_update (t);
 				self.handle_input (t);
@@ -175,14 +197,20 @@
 			__all__.Asteroid = Asteroid;
 			__all__.Bullet = Bullet;
 			__all__.ControlAxis = ControlAxis;
+			__all__.DEBUG = DEBUG;
 			__all__.FPSCounter = FPSCounter;
 			__all__.Game = Game;
 			__all__.Graphics = Graphics;
 			__all__.Keyboard = Keyboard;
 			__all__.Ship = Ship;
 			__all__.canvas = canvas;
+			__all__.coroutine = coroutine;
+			__all__.done = done;
 			__all__.game = game;
+			__all__.logger = logger;
 			__all__.now = now;
+			__all__.timer = timer;
+			__all__.waiter = waiter;
 			__all__.wrap = wrap;
 		__pragma__ ('</all>')
 	}) ();

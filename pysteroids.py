@@ -4,7 +4,26 @@ import random
 import org.threejs as three
 from controls import Keyboard, ControlAxis
 from units import Ship, Asteroid, Bullet
-from utils import wrap, now, FPSCounter
+from utils import wrap, now, FPSCounter, timer, coroutine
+from org.transcrypt.stubs.browser import __pragma__
+
+
+DEBUG = True
+logger = logging.getLogger('root')
+logger.addHandler(logging.StreamHandler())
+
+if DEBUG:
+    logger.setLevel(logging.INFO)
+    logger.info("====== debug logging on =====")
+
+
+def waiter(*args):
+    return True, args[0]
+
+
+def done(*args):
+    print ("done at", args[0])
+
 
 
 class Graphics:
@@ -44,6 +63,12 @@ class Game:
         title = document.getElementById("game_over")
         title.style.top = v_center
 
+        self.timer = timer(1.5, waiter, done)
+        print (self.timer)
+        next(self.timer)
+
+
+
     def create_controls(self):
         self.keyboard.add_handler('spin', ControlAxis('ArrowRight', 'ArrowLeft', attack=1, decay=.6))
         self.keyboard.add_handler('thrust', ControlAxis('ArrowUp', 'ArrowDown', attack=.75, decay=2, deadzone=.1))
@@ -54,7 +79,10 @@ class Game:
     def setup(self):
 
         self.ship = Ship(self.keyboard, self)
+
         self.graphics.add(self.ship)
+
+
 
         def rsign():
             if random.random() < .5:
@@ -90,10 +118,14 @@ class Game:
         if len(self.asteroids) == 0:
             document.getElementById("game_over").style.zIndex = 10
             return
+        q = self.timer
+
+
 
         requestAnimationFrame(self.tick)
 
-        t = (now() - self.last_frame) / 1000.0
+        t = (now() - self.last_frame)
+        q.advance(t)
 
         self.fps_counter.update(t)
         self.keyboard.update(t)
@@ -163,4 +195,7 @@ class Game:
 
 canvas = document.getElementById("game_canvas")
 game = Game(canvas)
+
+
+
 game.tick()

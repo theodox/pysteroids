@@ -40,7 +40,8 @@
 						return 0;
 					};
 					var now = function () {
-						return new Date;
+						var d = new Date;
+						return d.getTime () / 1000.0;
 					};
 					var set_element = function (id, value) {
 						document.getElementById (id).innerHTML = value;
@@ -92,18 +93,73 @@
 							}
 						});}
 					});
+					var advance = function (cr, value) {
+						(function () {return cr.next (value).value}) ();
+					};
+					var coroutine = function (loop, callback) {
+						var callback_fn = (callback !== null ? callback : (function __lambda__ (a) {
+							return a;
+						}));
+						var coroutine_generator = function* () {
+							var alive = true;
+							var result = null;
+							while (alive) {
+								var next_value = yield;
+								var __left0__ = loop (next_value);
+								var alive = __left0__ [0];
+								var result = __left0__ [1];
+								yield result;
+							}
+							yield callback_fn (result);
+						};
+						var cr = coroutine_generator ();
+						cr.advance = (function __lambda__ (a) {
+							return advance (cr, a);
+						});
+						return cr;
+					};
+					var timer = function (duration, loop, callback) {
+						var expires_at = now () + duration;
+						var loop_fn = (loop !== null ? loop : (function __lambda__ (a) {
+							return tuple ([true, a]);
+						}));
+						var callback_fn = (callback !== null ? callback : (function __lambda__ (a) {
+							return a;
+						}));
+						var timer_coroutine = function* () {
+							var alive = true;
+							var result = null;
+							while (alive) {
+								var next_value = yield;
+								var __left0__ = loop_fn (next_value);
+								var alive = __left0__ [0];
+								var result = __left0__ [1];
+								var alive = alive && now () < expires_at;
+								yield result;
+							}
+							yield callback_fn (result);
+						};
+						var tc = timer_coroutine ();
+						tc.advance = (function __lambda__ (a) {
+							return advance (tc, a);
+						});
+						return tc;
+					};
 					__pragma__ ('<use>' +
 						'org.threejs' +
 					'</use>')
 					__pragma__ ('<all>')
 						__all__.AABB = AABB;
 						__all__.FPSCounter = FPSCounter;
+						__all__.advance = advance;
 						__all__.clamp = clamp;
+						__all__.coroutine = coroutine;
 						__all__.now = now;
 						__all__.pad_wrap = pad_wrap;
 						__all__.set_element = set_element;
 						__all__.sign = sign;
 						__all__.three = three;
+						__all__.timer = timer;
 						__all__.wrap = wrap;
 					__pragma__ ('</all>')
 				}
