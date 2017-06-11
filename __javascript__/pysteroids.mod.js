@@ -1,4 +1,5 @@
 	(function () {
+		var audio = {};
 		var logging = {};
 		var random = {};
 		__nest__ (logging, '', __init__ (__world__.logging));
@@ -14,6 +15,8 @@
 		var FPSCounter = __init__ (__world__.utils).FPSCounter;
 		var timer = __init__ (__world__.utils).timer;
 		var coroutine = __init__ (__world__.utils).coroutine;
+		var clamp = __init__ (__world__.utils).clamp;
+		__nest__ (audio, '', __init__ (__world__.audio));
 		var DEBUG = true;
 		var logger = logging.getLogger ('root');
 		logger.addHandler (logging.StreamHandler ());
@@ -48,6 +51,25 @@
 				self.scene.add (item.geo);
 			});}
 		});
+		var Audio = __class__ ('Audio', [object], {
+			get __init__ () {return __get__ (this, function (self) {
+				self.fire_rota = list ([audio.clip ('344276__nsstudios__laser3.wav'), audio.clip ('344276__nsstudios__laser3.wav'), audio.clip ('344276__nsstudios__laser3.wav'), audio.clip ('344276__nsstudios__laser3.wav')]);
+				self.explosion_rota = list ([audio.clip ('108641__juskiddink__nearby-explosion-with-debris.wav'), audio.clip ('108641__juskiddink__nearby-explosion-with-debris.wav'), audio.clip ('108641__juskiddink__nearby-explosion-with-debris.wav'), audio.clip ('108641__juskiddink__nearby-explosion-with-debris.wav')]);
+				self.thrust = audio.loop ('146770__qubodup__rocket-boost-engine-loop.wav');
+				self.fail = audio.clip ('172950__notr__saddertrombones.mp3');
+				self.thrust.play ();
+				self.shoot_ctr = 0;
+				self.explode_ctr = 0;
+			});},
+			get fire () {return __get__ (this, function (self) {
+				self.fire_rota [__mod__ (self.shoot_ctr, 4)].play ();
+				self.shoot_ctr++;
+			});},
+			get explode () {return __get__ (this, function (self) {
+				self.explosion_rota [__mod__ (self.shoot_ctr, 4)].play ();
+				self.shoot_ctr++;
+			});}
+		});
 		var Game = __class__ ('Game', [object], {
 			get __init__ () {return __get__ (this, function (self, canvas) {
 				self.keyboard = Keyboard ();
@@ -58,14 +80,14 @@
 				self.asteroids = list ([]);
 				self.setup ();
 				self.last_frame = now ();
+				self.audio = Audio ();
+				self.lives = 3;
+				self.resetter = null;
 				logging.warning (document.getElementById ('FPS'));
 				self.fps_counter = FPSCounter (document.getElementById ('FPS'));
 				var v_center = (window.innerHeight - 120) / 2.0;
 				var title = document.getElementById ('game_over');
 				title.style.top = v_center;
-				self.timer = timer (1.5, waiter, done);
-				print (self.timer);
-				py_next (self.timer);
 			});},
 			get create_controls () {return __get__ (this, function (self) {
 				self.keyboard.add_handler ('spin', ControlAxis ('ArrowRight', 'ArrowLeft', __kwargtrans__ ({attack: 1, decay: 0.6})));
@@ -106,14 +128,12 @@
 				}
 			});},
 			get tick () {return __get__ (this, function (self) {
-				if (len (self.asteroids) == 0) {
+				if (len (self.asteroids) == 0 || self.lives < 1) {
 					document.getElementById ('game_over').style.zIndex = 10;
 					return ;
 				}
-				var q = self.timer;
 				requestAnimationFrame (self.tick);
 				var t = now () - self.last_frame;
-				q.advance (t);
 				self.fps_counter.py_update (t);
 				self.keyboard.py_update (t);
 				self.handle_input (t);
@@ -131,10 +151,25 @@
 						}
 					}
 				}
+				if (self.ship.visible) {
+					for (var a of self.asteroids) {
+						if (a.bbox.contains (self.ship.position)) {
+							var d = a.geo.position.distanceTo (self.ship.position);
+							if (d < a.radius + 0.5) {
+								self.resetter = self.kill ();
+								dead.append (a);
+							}
+						}
+					}
+				}
+				else {
+					self.resetter.advance (t);
+				}
 				for (var d of dead) {
 					self.asteroids.remove (d);
 					d.geo.visible = false;
 					if (d.radius > 1.5) {
+						self.audio.explode ();
 						var new_asteroids = random.randint (2, 5);
 						for (var n = 0; n < new_asteroids; n++) {
 							var new_a = Asteroid ((d.radius + 1.0) / new_asteroids, d.position);
@@ -156,18 +191,24 @@
 					item.py_update (t);
 					wrap (item.geo);
 				}
+				if (self.resetter !== null) {
+					self.resetter.advance (t);
+				}
 				self.graphics.render ();
 				self.last_frame = now ();
 			});},
 			get handle_input () {return __get__ (this, function (self, t) {
 				if (self.keyboard.get_axis ('fire') >= 1) {
 					var mo = three.Vector3 ().copy (self.ship.momentum).multiplyScalar (t);
-					self.fire (self.ship.position, self.ship.heading, mo);
+					if (self.fire (self.ship.position, self.ship.heading, mo)) {
+						self.audio.fire ();
+					}
 					self.keyboard.py_clear ('fire');
 				}
 				var spin = self.keyboard.get_axis ('spin');
 				self.ship.spin (spin * t);
 				var thrust = self.keyboard.get_axis ('thrust');
+				self.audio.thrust.volume = clamp (thrust * 5, 0, 1);
 				self.ship.thrust (thrust * t);
 			});},
 			get fire () {return __get__ (this, function (self, pos, vector, momentum, t) {
@@ -177,15 +218,43 @@
 						each_bullet.vector = vector;
 						each_bullet.lifespan = 0;
 						each_bullet.momentum = three.Vector3 ().copy (momentum).multiplyScalar (0.66);
-						return ;
+						return true;
 					}
 				}
+				return false;
+			});},
+			get kill () {return __get__ (this, function (self) {
+				self.lives--;
+				self.ship.momentum = three.Vector3 (0, 0, 0);
+				self.ship.position = three.Vector3 (0, 0, 0);
+				self.ship.geo.matrixWorldNeedsUpdate = true;
+				self.ship.visible = false;
+				var can_reappear = now () + 5;
+				var reappear = function (t) {
+					if (now () < can_reappear) {
+						return tuple ([true, 'waiting']);
+					}
+					for (var a of self.asteroids) {
+						if (a.bbox.contains (self.ship.position)) {
+							return tuple ([true, "can't spawn"]);
+						}
+					}
+					return tuple ([false, 'OK']);
+				};
+				var clear_resetter = function () {
+					self.ship.visible = true;
+					self.resetter = null;
+				};
+				var reset = coroutine (reappear, clear_resetter);
+				py_next (reset);
+				return reset;
 			});}
 		});
 		var canvas = document.getElementById ('game_canvas');
 		var game = Game (canvas);
 		game.tick ();
 		__pragma__ ('<use>' +
+			'audio' +
 			'controls' +
 			'logging' +
 			'org.threejs' +
@@ -195,6 +264,7 @@
 		'</use>')
 		__pragma__ ('<all>')
 			__all__.Asteroid = Asteroid;
+			__all__.Audio = Audio;
 			__all__.Bullet = Bullet;
 			__all__.ControlAxis = ControlAxis;
 			__all__.DEBUG = DEBUG;
@@ -204,6 +274,7 @@
 			__all__.Keyboard = Keyboard;
 			__all__.Ship = Ship;
 			__all__.canvas = canvas;
+			__all__.clamp = clamp;
 			__all__.coroutine = coroutine;
 			__all__.done = done;
 			__all__.game = game;

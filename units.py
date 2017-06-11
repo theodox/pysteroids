@@ -12,13 +12,23 @@ class Unit:
     def get_position(self):
         return self.geo.position
 
+    def set_position(self, p):
+        self.geo.matrixWorld.setPosition(p)
+
     def update(self, t):
         current_pos = self.geo.position
         move = three.Vector3().copy(self.momentum)
         move.multiplyScalar(t)
         self.geo.matrixWorld.setPosition(current_pos.add(move))
 
-    position = property(get_position)
+    def get_vis(self):
+        return self.geo.visible
+
+    def set_vis(self, v):
+        self.geo.visible = v
+
+    visible = property(get_vis, set_vis)
+    position = property(get_position, set_position)
 
 
 class Ship(Unit):
@@ -53,6 +63,7 @@ class Ship(Unit):
     def spin(self, amt):
         self.geo.rotateZ(amt * self.ROTATE_SPEED * -1)
 
+
     def update(self, t):
         Unit.update(self, t)
         self.bbox.update(self.position)
@@ -80,7 +91,6 @@ class Asteroid(Unit):
     def update(self, t):
         Unit.update(self, t)
         self.bbox.update(self.position)
-
 
 
 class Bullet:

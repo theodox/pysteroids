@@ -17,14 +17,24 @@
 						get get_position () {return __get__ (this, function (self) {
 							return self.geo.position;
 						});},
+						get set_position () {return __get__ (this, function (self, p) {
+							self.geo.matrixWorld.setPosition (p);
+						});},
 						get py_update () {return __get__ (this, function (self, t) {
 							var current_pos = self.geo.position;
 							var move = three.Vector3 ().copy (self.momentum);
 							move.multiplyScalar (t);
 							self.geo.matrixWorld.setPosition (current_pos.add (move));
+						});},
+						get get_vis () {return __get__ (this, function (self) {
+							return self.geo.visible;
+						});},
+						get set_vis () {return __get__ (this, function (self, v) {
+							self.geo.visible = v;
 						});}
 					});
-					Object.defineProperty (Unit, 'position', property.call (Unit, Unit.get_position));;
+					Object.defineProperty (Unit, 'visible', property.call (Unit, Unit.get_vis, Unit.set_vis));;
+					Object.defineProperty (Unit, 'position', property.call (Unit, Unit.get_position, Unit.set_position));;
 					var Ship = __class__ ('Ship', [Unit], {
 						ROTATE_SPEED: 2.1,
 						THRUST: 45,

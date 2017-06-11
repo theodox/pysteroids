@@ -4,9 +4,9 @@ import random
 import org.threejs as three
 from controls import Keyboard, ControlAxis
 from units import Ship, Asteroid, Bullet
-from utils import wrap, now, FPSCounter, timer, coroutine
+from utils import wrap, now, FPSCounter, timer, coroutine, clamp
+import audio
 from org.transcrypt.stubs.browser import __pragma__
-
 
 DEBUG = True
 logger = logging.getLogger('root')
@@ -22,8 +22,7 @@ def waiter(*args):
 
 
 def done(*args):
-    print ("done at", args[0])
-
+    print("done at", args[0])
 
 
 class Graphics:
@@ -45,6 +44,31 @@ class Graphics:
         self.scene.add(item.geo)
 
 
+class Audio:
+    def __init__(self):
+        self.fire_rota = [audio.clip('344276__nsstudios__laser3.wav'),
+                          audio.clip('344276__nsstudios__laser3.wav'),
+                          audio.clip('344276__nsstudios__laser3.wav'),
+                          audio.clip('344276__nsstudios__laser3.wav')]
+        self.explosion_rota = [audio.clip('108641__juskiddink__nearby-explosion-with-debris.wav'),
+                               audio.clip('108641__juskiddink__nearby-explosion-with-debris.wav'),
+                               audio.clip('108641__juskiddink__nearby-explosion-with-debris.wav'),
+                               audio.clip('108641__juskiddink__nearby-explosion-with-debris.wav'), ]
+        self.thrust = audio.loop('146770__qubodup__rocket-boost-engine-loop.wav')
+        self.fail = audio.clip('172950__notr__saddertrombones.mp3')
+        self.thrust.play()
+        self.shoot_ctr = 0
+        self.explode_ctr = 0
+
+    def fire(self):
+        self.fire_rota[self.shoot_ctr % 4].play()
+        self.shoot_ctr += 1
+
+    def explode(self):
+        self.explosion_rota[self.shoot_ctr % 4].play()
+        self.shoot_ctr += 1
+
+
 class Game:
     def __init__(self, canvas):
         self.keyboard = Keyboard()
@@ -55,6 +79,10 @@ class Game:
         self.asteroids = []
         self.setup()
         self.last_frame = now()
+        self.audio = Audio()
+        self.lives = 3
+        self.resetter = None
+
         logging.warning(document.getElementById("FPS"))
         self.fps_counter = FPSCounter(document.getElementById("FPS"))
 
@@ -62,12 +90,6 @@ class Game:
         v_center = (window.innerHeight - 120) / 2.0
         title = document.getElementById("game_over")
         title.style.top = v_center
-
-        self.timer = timer(1.5, waiter, done)
-        print (self.timer)
-        next(self.timer)
-
-
 
     def create_controls(self):
         self.keyboard.add_handler('spin', ControlAxis('ArrowRight', 'ArrowLeft', attack=1, decay=.6))
@@ -81,8 +103,6 @@ class Game:
         self.ship = Ship(self.keyboard, self)
 
         self.graphics.add(self.ship)
-
-
 
         def rsign():
             if random.random() < .5:
@@ -115,17 +135,13 @@ class Game:
 
     def tick(self):
 
-        if len(self.asteroids) == 0:
+        if len(self.asteroids) == 0 or self.lives < 1:
             document.getElementById("game_over").style.zIndex = 10
             return
-        q = self.timer
-
-
 
         requestAnimationFrame(self.tick)
 
         t = (now() - self.last_frame)
-        q.advance(t)
 
         self.fps_counter.update(t)
         self.keyboard.update(t)
@@ -143,10 +159,22 @@ class Game:
                         if d < a.radius:
                             b.reset()
                             dead.append(a)
+
+        if self.ship.visible:
+            for a in self.asteroids:
+                if a.bbox.contains(self.ship.position):
+                    d = a.geo.position.distanceTo(self.ship.position)
+                    if d < (a.radius + 0.5):
+                        self.resetter = self.kill()
+                        dead.append(a)
+        else:
+            self.resetter.advance(t)
+
         for d in dead:
             self.asteroids.remove(d)
             d.geo.visible = False
             if d.radius > 1.5:
+                self.audio.explode()
                 new_asteroids = random.randint(2, 5)
                 for n in range(new_asteroids):
                     new_a = Asteroid((d.radius + 1.0) / new_asteroids, d.position)
@@ -167,6 +195,9 @@ class Game:
             item.update(t)
             wrap(item.geo)
 
+        if self.resetter is not None:
+            self.resetter.advance(t)
+
         self.graphics.render()
         self.last_frame = now()
 
@@ -174,13 +205,15 @@ class Game:
 
         if self.keyboard.get_axis('fire') >= 1:
             mo = three.Vector3().copy(self.ship.momentum).multiplyScalar(t)
-            self.fire(self.ship.position, self.ship.heading, mo)
+            if self.fire(self.ship.position, self.ship.heading, mo):
+                self.audio.fire()
             self.keyboard.clear('fire')
 
         spin = self.keyboard.get_axis('spin')
         self.ship.spin(spin * t)
 
         thrust = self.keyboard.get_axis('thrust')
+        self.audio.thrust.volume = clamp(thrust * 5, 0, 1)
         self.ship.thrust(thrust * t)
 
     def fire(self, pos, vector, momentum, t):
@@ -190,12 +223,36 @@ class Game:
                 each_bullet.vector = vector
                 each_bullet.lifespan = 0
                 each_bullet.momentum = three.Vector3().copy(momentum).multiplyScalar(.66)
-                return
+                return True
+        return False
+
+    def kill(self):
+        self.lives -= 1
+        self.ship.momentum = three.Vector3(0, 0, 0)
+        self.ship.position = three.Vector3(0,0,0)
+        self.ship.geo.matrixWorldNeedsUpdate = True
+        self.ship.visible = False
+        can_reappear = now() + 5
+
+        def reappear(t):
+            if now() < can_reappear:
+                return True, "waiting"
+            for a in self.asteroids:
+                if a.bbox.contains(self.ship.position):
+                    return True, "can't spawn"
+            return False, "OK"
+
+        def clear_resetter():
+            self.ship.visible = True
+            self.resetter = None
+
+        reset = coroutine(reappear, clear_resetter)
+
+        next(reset)
+        return reset
 
 
 canvas = document.getElementById("game_canvas")
 game = Game(canvas)
-
-
 
 game.tick()
