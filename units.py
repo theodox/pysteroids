@@ -13,6 +13,7 @@ class Unit:
         return self.geo.position
 
     def set_position(self, p):
+        print ("got", p.x, p.y, p.z)
         self.geo.matrixWorld.setPosition(p)
 
     def update(self, t):

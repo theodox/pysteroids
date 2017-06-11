@@ -229,8 +229,7 @@ class Game:
     def kill(self):
         self.lives -= 1
         self.ship.momentum = three.Vector3(0, 0, 0)
-        self.ship.position = three.Vector3(0,0,0)
-        self.ship.geo.matrixWorldNeedsUpdate = True
+        self.ship.position = three.Vector3(0, 0, 0)
         self.ship.visible = False
         can_reappear = now() + 5
 
