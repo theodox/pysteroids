@@ -72,7 +72,7 @@ class Audio:
 class Game:
     def __init__(self, canvas):
         self.keyboard = Keyboard()
-        self.graphics = Graphics(window.innerWidth - 32, window.innerHeight - 32, canvas)
+        self.graphics = Graphics(window.innerWidth - 64, window.innerHeight - 64, canvas)
         self.create_controls()
         self.ship = None
         self.bullets = []
@@ -98,7 +98,7 @@ class Game:
         document.onkeydown = self.keyboard.key_down
         document.onkeyup = self.keyboard.key_up
 
-        # prevent arrow keys from scrolling browser 
+        # prevent arrow keys from scrolling browser
         def suppress_scroll(e):
             if e.keyCode in [32, 37, 38, 39, 40]:
                 e.preventDefault()
