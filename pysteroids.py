@@ -230,8 +230,14 @@ class Game:
         self.lives -= 1
         self.ship.momentum = three.Vector3(0, 0, 0)
         self.ship.position = three.Vector3(0, 0, 0)
+        self.ship.geo.setRotationFromEuler(three.Euler(0,0,0))
+        self.keyboard.clear('spin')
+        self.keyboard.clear('thrust')
+        self.keyboard.clear('fire')
+
         self.ship.visible = False
-        can_reappear = now() + 5
+        self.audio.explode()
+        can_reappear = now() + 3.0
 
         def reappear(t):
             if now() < can_reappear:

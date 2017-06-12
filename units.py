@@ -13,14 +13,15 @@ class Unit:
         return self.geo.position
 
     def set_position(self, p):
-        print ("got", p.x, p.y, p.z)
-        self.geo.matrixWorld.setPosition(p)
+        self.geo.position.set(p.x, p.y, p.z)
 
     def update(self, t):
-        current_pos = self.geo.position
-        move = three.Vector3().copy(self.momentum)
-        move.multiplyScalar(t)
-        self.geo.matrixWorld.setPosition(current_pos.add(move))
+        if self.visible:
+            current_pos = self.geo.position
+            move = three.Vector3().copy(self.momentum).multiplyScalar(t)
+            #move.multiplyScalar(t)
+            current_pos = current_pos.add(move)
+            self.geo.position.set(current_pos.x, current_pos.y, current_pos.z)
 
     def get_vis(self):
         return self.geo.visible
@@ -64,7 +65,6 @@ class Ship(Unit):
     def spin(self, amt):
         self.geo.rotateZ(amt * self.ROTATE_SPEED * -1)
 
-
     def update(self, t):
         Unit.update(self, t)
         self.bbox.update(self.position)
@@ -73,6 +73,7 @@ class Ship(Unit):
         # return the local Y axis, since Z is 'up'
         m = self.geo.matrixWorld.elements
         return three.Vector3(m[4], m[5], m[6])
+
 
     heading = property(get_heading)
 

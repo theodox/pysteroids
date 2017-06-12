@@ -18,13 +18,15 @@
 							return self.geo.position;
 						});},
 						get set_position () {return __get__ (this, function (self, p) {
-							self.geo.matrixWorld.setPosition (p);
+							self.geo.position.set (p.x, p.y, p.z);
 						});},
 						get py_update () {return __get__ (this, function (self, t) {
-							var current_pos = self.geo.position;
-							var move = three.Vector3 ().copy (self.momentum);
-							move.multiplyScalar (t);
-							self.geo.matrixWorld.setPosition (current_pos.add (move));
+							if (self.visible) {
+								var current_pos = self.geo.position;
+								var move = three.Vector3 ().copy (self.momentum).multiplyScalar (t);
+								var current_pos = current_pos.add (move);
+								self.geo.position.set (current_pos.x, current_pos.y, current_pos.z);
+							}
 						});},
 						get get_vis () {return __get__ (this, function (self) {
 							return self.geo.visible;

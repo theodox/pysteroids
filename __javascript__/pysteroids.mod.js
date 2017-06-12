@@ -227,9 +227,13 @@
 				self.lives--;
 				self.ship.momentum = three.Vector3 (0, 0, 0);
 				self.ship.position = three.Vector3 (0, 0, 0);
-				self.ship.geo.matrixWorldNeedsUpdate = true;
+				self.ship.geo.setRotationFromEuler (three.Euler (0, 0, 0));
+				self.keyboard.py_clear ('spin');
+				self.keyboard.py_clear ('thrust');
+				self.keyboard.py_clear ('fire');
 				self.ship.visible = false;
-				var can_reappear = now () + 5;
+				self.audio.explode ();
+				var can_reappear = now () + 3.0;
 				var reappear = function (t) {
 					if (now () < can_reappear) {
 						return tuple ([true, 'waiting']);
