@@ -1,5 +1,5 @@
 "use strict";
-// Transcrypt'ed from Python, 2017-06-11 21:45:38
+// Transcrypt'ed from Python, 2017-06-11 22:49:20
 function pysteroids () {
    var __symbols__ = ['__py3.6__', '__esv6__'];
     var __all__ = {};
@@ -7813,7 +7813,8 @@ function pysteroids () {
 				self.audio = Audio ();
 				self.lives = 3;
 				self.resetter = null;
-				logging.warning (document.getElementById ('FPS'));
+				self.score = 0;
+				self.score_display = document.getElementById ('score');
 				self.fps_counter = FPSCounter (document.getElementById ('FPS'));
 				var v_center = (window.innerHeight - 120) / 2.0;
 				var title = document.getElementById ('game_over');
@@ -7821,7 +7822,7 @@ function pysteroids () {
 			});},
 			get create_controls () {return __get__ (this, function (self) {
 				self.keyboard.add_handler ('spin', ControlAxis ('ArrowRight', 'ArrowLeft', __kwargtrans__ ({attack: 1, decay: 0.6})));
-				self.keyboard.add_handler ('thrust', ControlAxis ('ArrowUp', 'ArrowDown', __kwargtrans__ ({attack: 0.75, decay: 2, deadzone: 0.1})));
+				self.keyboard.add_handler ('thrust', ControlAxis ('ArrowUp', 'ArrowDown', __kwargtrans__ ({attack: 0.65, decay: 2.5, deadzone: 0.1})));
 				self.keyboard.add_handler ('fire', ControlAxis (' ', 'None', __kwargtrans__ ({attack: 10})));
 				document.onkeydown = self.keyboard.key_down;
 				document.onkeyup = self.keyboard.key_up;
@@ -7860,13 +7861,16 @@ function pysteroids () {
 			get tick () {return __get__ (this, function (self) {
 				if (len (self.asteroids) == 0 || self.lives < 1) {
 					document.getElementById ('game_over').style.zIndex = 10;
+					document.getElementById ('credits').style.zIndex = 10;
 					return ;
 				}
 				requestAnimationFrame (self.tick);
 				var t = now () - self.last_frame;
 				self.fps_counter.py_update (t);
 				self.keyboard.py_update (t);
-				self.handle_input (t);
+				if (self.ship.visible) {
+					self.handle_input (t);
+				}
 				var dead = list ([]);
 				for (var b of self.bullets) {
 					if (b.position.z < 1000) {
@@ -7887,6 +7891,7 @@ function pysteroids () {
 							var d = a.geo.position.distanceTo (self.ship.position);
 							if (d < a.radius + 0.5) {
 								self.resetter = self.kill ();
+								print ('!!', self.resetter);
 								dead.append (a);
 							}
 						}
@@ -7897,6 +7902,8 @@ function pysteroids () {
 				}
 				for (var d of dead) {
 					self.asteroids.remove (d);
+					var new_score = int (100 * d.radius);
+					self.update_score (new_score);
 					d.geo.visible = false;
 					if (d.radius > 1.5) {
 						self.audio.explode ();
@@ -7962,7 +7969,7 @@ function pysteroids () {
 				self.keyboard.py_clear ('thrust');
 				self.keyboard.py_clear ('fire');
 				self.ship.visible = false;
-				self.audio.explode ();
+				self.audio.fail.play ();
 				var can_reappear = now () + 3.0;
 				var reappear = function (t) {
 					if (now () < can_reappear) {
@@ -7982,6 +7989,11 @@ function pysteroids () {
 				var reset = coroutine (reappear, clear_resetter);
 				py_next (reset);
 				return reset;
+			});},
+			get update_score () {return __get__ (this, function (self, score) {
+				self.score += score;
+				self.score_display.innerHTML = self.score;
+				print (self.score, self.score_display);
 			});}
 		});
 		var canvas = document.getElementById ('game_canvas');

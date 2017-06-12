@@ -5,7 +5,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js"></script>
 </head>
 <style>
-h1, h2, h3 {
+h1, h2, h3, h4 {
 font-family: 'Bungee Hairline', cursive;
  }
 
@@ -32,7 +32,7 @@ font-family: 'Bungee Hairline', cursive;
     #game_over {
     position: relative;
     margin 100 auto;
-    color: #AAAACC;
+    color: #AAAAFF;
     z-index: -10;
     text-align: center;
     vertical-align: text-center;
@@ -46,22 +46,55 @@ font-family: 'Bungee Hairline', cursive;
     width: 100%;
     }
 
+    #score {
+    position: absolute;
+    top: 32px;
+    right: 64px;
+    color: #AAAAAA;
+    text-align: right;
+    }
+
+
+
+    #credits {
+    position: absolute;
+    left: 32px;
+    bottom: 32px;
+    color: #BBA0A0;
+    z-index: -10;
+    }
+
+    a:link {
+    color: #FFFFFF
+    }
+
+    a:visited {
+    color: #BBBBBB
+    }
+
+
 </style>
 <body>
 <div id="frame">
     <div id="game_canvas"></div>
     <h2 id="title">Pysteroids</h2>
+    <h2 id="score">0</h2>
     <h3 id="FPS"></h3>
     <h1 id="game_over">GAME OVER</h1>
-
+    <h4 id="credits">
+        <p>(c) 2017 Steve Theodore</p>
+        <p>Made with Python and <a href="http://transcrypt.org">Transcrpt</a></p>
+        <p>Sounds from <a href="http://www.freesound.org">freesound.org</a>, (c): </p>
+        <ul>
+            <li><a href="https://www.freesound.org/people/newagesoup/">newagesoup</a></li>
+            <li><a href="https://www.freesound.org/people/qubodup/">qubodup</a></li>
+            <li><a href="https://www.freesound.org/people/NotR/">NotR</a></li>
+            <li><a href="http://www.freesound.org/people/juskiddink/">juskiddink</a></li>
+            <li><a href="http://www.freesound.org/people/nsstudios/">nsstudios</a></li>
+        </ul>
+    </h4>
 
 </div>
-<comment>multiple audio sources so the fires can stomp each other</comment>
-<audio id="fire1" src="./344276__nsstudios__laser3.wav"></audio>
-<audio id="fire2" src="./344276__nsstudios__laser3.wav"></audio>
-<audio id="fire3" src="./344276__nsstudios__laser3.wav"></audio>
-<audio id="fire4" src="./344276__nsstudios__laser3.wav"></audio>
-<audio id="thrust"></audio>
 
 <script src="__javascript__/pysteroids.js"></script>
 

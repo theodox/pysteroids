@@ -82,8 +82,8 @@ class Game:
         self.audio = Audio()
         self.lives = 3
         self.resetter = None
-
-        logging.warning(document.getElementById("FPS"))
+        self.score = 0
+        self.score_display = document.getElementById('score')
         self.fps_counter = FPSCounter(document.getElementById("FPS"))
 
         # adjust the position of the game over div
@@ -93,7 +93,7 @@ class Game:
 
     def create_controls(self):
         self.keyboard.add_handler('spin', ControlAxis('ArrowRight', 'ArrowLeft', attack=1, decay=.6))
-        self.keyboard.add_handler('thrust', ControlAxis('ArrowUp', 'ArrowDown', attack=.75, decay=2, deadzone=.1))
+        self.keyboard.add_handler('thrust', ControlAxis('ArrowUp', 'ArrowDown', attack=.65, decay=2.5, deadzone=.1))
         self.keyboard.add_handler('fire', ControlAxis(' ', 'None', attack=10))
         document.onkeydown = self.keyboard.key_down
         document.onkeyup = self.keyboard.key_up
@@ -101,7 +101,6 @@ class Game:
     def setup(self):
 
         self.ship = Ship(self.keyboard, self)
-
         self.graphics.add(self.ship)
 
         def rsign():
@@ -137,6 +136,7 @@ class Game:
 
         if len(self.asteroids) == 0 or self.lives < 1:
             document.getElementById("game_over").style.zIndex = 10
+            document.getElementById('credits').style.zIndex = 10
             return
 
         requestAnimationFrame(self.tick)
@@ -147,7 +147,8 @@ class Game:
         self.keyboard.update(t)
 
         # controls
-        self.handle_input(t)
+        if self.ship.visible:
+            self.handle_input(t)
 
         # clean up bullets, check for collisions
         dead = []
@@ -166,12 +167,16 @@ class Game:
                     d = a.geo.position.distanceTo(self.ship.position)
                     if d < (a.radius + 0.5):
                         self.resetter = self.kill()
+                        print ("!!", self.resetter)
                         dead.append(a)
         else:
             self.resetter.advance(t)
 
         for d in dead:
             self.asteroids.remove(d)
+            new_score = int(100 * d.radius)
+            self.update_score(new_score)
+
             d.geo.visible = False
             if d.radius > 1.5:
                 self.audio.explode()
@@ -230,13 +235,13 @@ class Game:
         self.lives -= 1
         self.ship.momentum = three.Vector3(0, 0, 0)
         self.ship.position = three.Vector3(0, 0, 0)
-        self.ship.geo.setRotationFromEuler(three.Euler(0,0,0))
+        self.ship.geo.setRotationFromEuler(three.Euler(0, 0, 0))
         self.keyboard.clear('spin')
         self.keyboard.clear('thrust')
         self.keyboard.clear('fire')
 
         self.ship.visible = False
-        self.audio.explode()
+        self.audio.fail.play()
         can_reappear = now() + 3.0
 
         def reappear(t):
@@ -255,6 +260,11 @@ class Game:
 
         next(reset)
         return reset
+
+    def update_score(self, score):
+        self.score += score
+        self.score_display.innerHTML = self.score
+        print(self.score, self.score_display)
 
 
 canvas = document.getElementById("game_canvas")
