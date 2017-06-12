@@ -1,5 +1,5 @@
 "use strict";
-// Transcrypt'ed from Python, 2017-06-11 22:49:20
+// Transcrypt'ed from Python, 2017-06-12 09:08:06
 function pysteroids () {
    var __symbols__ = ['__py3.6__', '__esv6__'];
     var __all__ = {};
@@ -209,7 +209,7 @@ function pysteroids () {
 						get __init__ () {return __get__ (this, function (self) {
 							self.interpreter_name = 'python';
 							self.transpiler_name = 'transcrypt';
-							self.transpiler_version = '3.6.25';
+							self.transpiler_version = '3.6.26';
 							self.target_subdir = '__javascript__';
 						});}
 					});
