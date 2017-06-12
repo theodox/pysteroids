@@ -72,7 +72,7 @@ class Audio:
 class Game:
     def __init__(self, canvas):
         self.keyboard = Keyboard()
-        self.graphics = Graphics(window.innerWidth - 64, window.innerHeight - 32, canvas)
+        self.graphics = Graphics(window.innerWidth, window.innerHeight, canvas)
         self.create_controls()
         self.ship = None
         self.bullets = []

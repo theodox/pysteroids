@@ -73,7 +73,7 @@
 		var Game = __class__ ('Game', [object], {
 			get __init__ () {return __get__ (this, function (self, canvas) {
 				self.keyboard = Keyboard ();
-				self.graphics = Graphics (window.innerWidth - 32, window.innerHeight - 32, canvas);
+				self.graphics = Graphics (window.innerWidth, window.innerHeight, canvas);
 				self.create_controls ();
 				self.ship = null;
 				self.bullets = list ([]);
@@ -96,6 +96,12 @@
 				self.keyboard.add_handler ('fire', ControlAxis (' ', 'None', __kwargtrans__ ({attack: 10})));
 				document.onkeydown = self.keyboard.key_down;
 				document.onkeyup = self.keyboard.key_up;
+				var suppress_scroll = function (e) {
+					if (__in__ (e.keyCode, list ([32, 37, 38, 39, 40]))) {
+						e.preventDefault ();
+					}
+				};
+				window.addEventListener ('keydown', suppress_scroll, false);
 			});},
 			get setup () {return __get__ (this, function (self) {
 				self.ship = Ship (self.keyboard, self);
