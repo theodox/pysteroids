@@ -98,6 +98,12 @@ class Game:
         document.onkeydown = self.keyboard.key_down
         document.onkeyup = self.keyboard.key_up
 
+        # prevent arrow keys from scrolling browser 
+        def suppress_scroll(e):
+            if e.keyCode in [32, 37, 38, 39, 40]:
+                e.preventDefault()
+        window.addEventListener("keydown", suppress_scroll, False)
+
     def setup(self):
 
         self.ship = Ship(self.keyboard, self)
