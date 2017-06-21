@@ -1,6 +1,5 @@
 from utils import clamp
 
-
 class Keyboard:
     def __init__(self):
         self.keyboard = {0: False}

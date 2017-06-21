@@ -12,18 +12,30 @@ class Unit:
     def get_position(self):
         return self.geo.position
 
-    def update(self, t):
-        current_pos = self.geo.position
-        move = three.Vector3().copy(self.momentum)
-        move.multiplyScalar(t)
-        self.geo.matrixWorld.setPosition(current_pos.add(move))
+    def set_position(self, p):
+        self.geo.position.set(p.x, p.y, p.z)
 
-    position = property(get_position)
+    def update(self, t):
+        if self.visible:
+            current_pos = self.geo.position
+            move = three.Vector3().copy(self.momentum).multiplyScalar(t)
+            #move.multiplyScalar(t)
+            current_pos = current_pos.add(move)
+            self.geo.position.set(current_pos.x, current_pos.y, current_pos.z)
+
+    def get_vis(self):
+        return self.geo.visible
+
+    def set_vis(self, v):
+        self.geo.visible = v
+
+    visible = property(get_vis, set_vis)
+    position = property(get_position, set_position)
 
 
 class Ship(Unit):
     ROTATE_SPEED = 2.1
-    THRUST = .075
+    THRUST = 45
 
     def __init__(self, keyboard, game):
         Unit.__init__(self)
@@ -45,28 +57,23 @@ class Ship(Unit):
         self.bbox = AABB(2, 2, self.geo.position)
         self.game = game
 
+    def thrust(self, amt):
+        thrust_amt = amt * self.THRUST
+        self.momentum = self.momentum.add(self.heading.multiplyScalar(thrust_amt))
+        self.exhaust.visible = amt > 0
+
+    def spin(self, amt):
+        self.geo.rotateZ(amt * self.ROTATE_SPEED * -1)
+
     def update(self, t):
-        thrust = self.keyboard.get_axis('thrust')
-        self.geo.rotateZ(self.keyboard.get_axis('spin') * self.ROTATE_SPEED * t * -1)
-
-        if thrust > 0:
-            thrust_amt = thrust * self.THRUST
-            self.momentum = self.momentum.add(self.heading.multiplyScalar(thrust_amt))
-
         Unit.update(self, t)
-        self.exhaust.visible = thrust > 0
-
-        if self.keyboard.get_axis('fire') >= 1:
-            mo = three.Vector3().copy(self.momentum).multiplyScalar(t)
-            self.game.fire(self.geo.position, self.heading, mo)
-            self.keyboard.clear('fire')
         self.bbox.update(self.position)
 
-    def get_heading(self) -> float:
+    def get_heading(self):
         # return the local Y axis, since Z is 'up'
-        return three.Vector3(self.geo.matrixWorld.elements[4],
-                             self.geo.matrixWorld.elements[5],
-                             self.geo.matrixWorld.elements[6])
+        m = self.geo.matrixWorld.elements
+        return three.Vector3(m[4], m[5], m[6])
+
 
     heading = property(get_heading)
 
@@ -86,7 +93,6 @@ class Asteroid(Unit):
     def update(self, t):
         Unit.update(self, t)
         self.bbox.update(self.position)
-
 
 
 class Bullet:
