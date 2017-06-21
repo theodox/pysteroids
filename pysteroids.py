@@ -4,7 +4,8 @@ import random
 import org.threejs as three
 from controls import Keyboard, ControlAxis
 from units import Ship, Asteroid, Bullet
-from utils import wrap, now, FPSCounter, timer, coroutine, clamp
+from utils import wrap, now, FPSCounter, timer, coroutine, clamp, set_limits
+import math
 import audio
 from org.transcrypt.stubs.browser import __pragma__
 
@@ -25,17 +26,25 @@ def done(*args):
     print("done at", args[0])
 
 
+def hfov(vfov, w, h):
+    """gives horizontal fov (in rads) for given vertical fov (in rads) and aspect ratio"""
+    return
+
 class Graphics:
-    def __init__(self, w, h, canvas):
+    def __init__(self, w, h, canvas, fov = 53.13):
         self.width = float(w)
         self.height = float(h)
         self.scene = three.Scene()
-        self.camera = three.PerspectiveCamera(53.13, self.width / self.height, 1, 500)
+        self.camera = three.PerspectiveCamera(fov, self.width / self.height, 1, 500)
+        self.vfov = math.radians(fov)
+        self.hfov = 2 * math.atan (math.tan( math.radians(fov) / 2.0 ) * (w / h * 1.0))
+
         self.camera.position.set(0, 0, 80)
         self.camera.lookAt(self.scene.position)
         self.renderer = three.WebGLRenderer({'Antialias': True})
         self.renderer.setSize(self.width, self.height)
         canvas.appendChild(self.renderer.domElement)
+
 
     def render(self):
         self.renderer.render(self.scene, self.camera)
@@ -43,19 +52,26 @@ class Graphics:
     def add(self, item):
         self.scene.add(item.geo)
 
+    def extent(self):
+        v_extent = math.tan(self.vfov / 2.0) * 80
+        h_extent = math.tan(self.hfov / 2.0) * 80
+        return h_extent, v_extent
+
 
 class Audio:
-    def __init__(self):
-        self.fire_rota = [audio.clip('344276__nsstudios__laser3.wav'),
-                          audio.clip('344276__nsstudios__laser3.wav'),
-                          audio.clip('344276__nsstudios__laser3.wav'),
-                          audio.clip('344276__nsstudios__laser3.wav')]
-        self.explosion_rota = [audio.clip('108641__juskiddink__nearby-explosion-with-debris.wav'),
-                               audio.clip('108641__juskiddink__nearby-explosion-with-debris.wav'),
-                               audio.clip('108641__juskiddink__nearby-explosion-with-debris.wav'),
-                               audio.clip('108641__juskiddink__nearby-explosion-with-debris.wav'), ]
-        self.thrust = audio.loop('146770__qubodup__rocket-boost-engine-loop.wav')
-        self.fail = audio.clip('172950__notr__saddertrombones.mp3')
+    def __init__(self, audio_path = ""):
+        pth = lambda p: audio_path + p
+
+        self.fire_rota = [audio.clip(pth('344276__nsstudios__laser3.wav')),
+                          audio.clip(pth('344276__nsstudios__laser3.wav')),
+                          audio.clip(pth('344276__nsstudios__laser3.wav')),
+                          audio.clip(pth('344276__nsstudios__laser3.wav'))]
+        self.explosion_rota = [audio.clip(pth('108641__juskiddink__nearby-explosion-with-debris.wav')),
+                               audio.clip(pth('108641__juskiddink__nearby-explosion-with-debris.wav')),
+                               audio.clip(pth('108641__juskiddink__nearby-explosion-with-debris.wav')),
+                               audio.clip(pth('108641__juskiddink__nearby-explosion-with-debris.wav')) ]
+        self.thrust = audio.loop(pth('146770__qubodup__rocket-boost-engine-loop.wav'))
+        self.fail = audio.clip(pth('172950__notr__saddertrombones.mp3'))
         self.thrust.play()
         self.shoot_ctr = 0
         self.explode_ctr = 0
@@ -70,9 +86,15 @@ class Audio:
 
 
 class Game:
-    def __init__(self, canvas):
+    def __init__(self, canvas, fullscreen=True):
         self.keyboard = Keyboard()
-        self.graphics = Graphics(window.innerWidth, window.innerHeight, canvas)
+        if fullscreen:
+            self.graphics = Graphics(window.innerWidth, window.innerHeight, canvas)
+        else:
+            self.graphics = Graphics(canvas.offsetWidth, (3  * canvas.offsetWidth) / 4, canvas )
+
+        self.extents = self.graphics.extent()
+        set_limits (*self.extents)
         self.create_controls()
         self.ship = None
         self.bullets = []
@@ -86,10 +108,16 @@ class Game:
         self.score_display = document.getElementById('score')
         self.fps_counter = FPSCounter(document.getElementById("FPS"))
 
+
         # adjust the position of the game over div
-        v_center = (window.innerHeight - 120) / 2.0
+        v_center = canvas.offsetHeight / 3
         title = document.getElementById("game_over")
         title.style.top = v_center
+        hud = document.getElementById('hud')
+        hud.style.width = canvas.offsetWidth
+        hud.style.height = canvas.offsetHeight
+        frame = document.getElementById('game_frame')
+        frame.style.min_height = canvas.offsetHeight
 
     def create_controls(self):
         self.keyboard.add_handler('spin', ControlAxis('ArrowRight', 'ArrowLeft', attack=1, decay=.6))
@@ -141,8 +169,8 @@ class Game:
     def tick(self):
 
         if len(self.asteroids) == 0 or self.lives < 1:
-            document.getElementById("game_over").style.zIndex = 10
-            document.getElementById('credits').style.zIndex = 10
+            document.getElementById("game_over").style.visibility = 'visible'
+            document.getElementById('credits').style.visibility = 'visible'
             return
 
         requestAnimationFrame(self.tick)
@@ -274,6 +302,8 @@ class Game:
 
 
 canvas = document.getElementById("game_canvas")
-game = Game(canvas)
+game = Game(canvas, True)
+
 
 game.tick()
+

@@ -1,5 +1,6 @@
-from org import threejs as three
 from org.transcrypt.stubs.browser import __pragma__
+
+from org import threejs as three
 
 
 def pad_wrap(min, max, val):
@@ -10,11 +11,20 @@ def pad_wrap(min, max, val):
     return val
 
 
+XWRAP = 0
+XNWRAP = 0
+YWRAP = 0
+YNWRAP = 0
+
+def set_limits(x: float, y: float):
+    nonlocal XWRAP, XNWRAP, YWRAP, YNWRAP
+    XWRAP = int(x)
+    XNWRAP = -1 * XWRAP
+    YWRAP = int(y)
+    YNWRAP = -1 * YWRAP
+
+
 def wrap(obj: three.Object3d):
-    XWRAP = 70
-    XNWRAP = -70
-    YWRAP = 35
-    YNWRAP = -35
 
     x, y, z = obj.position.x, obj.position.y, obj.position.z
     x = pad_wrap(XNWRAP, XWRAP, x)
