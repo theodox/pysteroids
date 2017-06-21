@@ -1,5 +1,5 @@
 "use strict";
-// Transcrypt'ed from Python, 2017-06-12 09:19:08
+// Transcrypt'ed from Python, 2017-06-21 01:00:08
 function pysteroids () {
    var __symbols__ = ['__py3.6__', '__esv6__'];
     var __all__ = {};
@@ -4354,6 +4354,96 @@ function pysteroids () {
 	);
 	__nest__ (
 		__all__,
+		'math', {
+			__all__: {
+				__inited__: false,
+				__init__: function (__all__) {
+					var pi = Math.PI;
+					var e = Math.E;
+					var exp = Math.exp;
+					var expm1 = function (x) {
+						return Math.exp (x) - 1;
+					};
+					var log = function (x, base) {
+						return (base === undefined ? Math.log (x) : Math.log (x) / Math.log (base));
+					};
+					var log1p = function (x) {
+						return Math.log (x + 1);
+					};
+					var log2 = function (x) {
+						return Math.log (x) / Math.LN2;
+					};
+					var log10 = function (x) {
+						return Math.log (x) / Math.LN10;
+					};
+					var pow = Math.pow;
+					var sqrt = Math.sqrt;
+					var sin = Math.sin;
+					var cos = Math.cos;
+					var tan = Math.tan;
+					var asin = Math.asin;
+					var acos = Math.acos;
+					var atan = Math.atan;
+					var atan2 = Math.atan2;
+					var hypot = Math.hypot;
+					var degrees = function (x) {
+						return (x * 180) / Math.PI;
+					};
+					var radians = function (x) {
+						return (x * Math.PI) / 180;
+					};
+					var sinh = Math.sinh;
+					var cosh = Math.cosh;
+					var tanh = Math.tanh;
+					var asinh = Math.asinh;
+					var acosh = Math.acosh;
+					var atanh = Math.atanh;
+					var floor = Math.floor;
+					var ceil = Math.ceil;
+					var trunc = Math.trunc;
+					var isnan = isNaN;
+					var inf = Infinity;
+					var nan = NaN;
+					__pragma__ ('<all>')
+						__all__.acos = acos;
+						__all__.acosh = acosh;
+						__all__.asin = asin;
+						__all__.asinh = asinh;
+						__all__.atan = atan;
+						__all__.atan2 = atan2;
+						__all__.atanh = atanh;
+						__all__.ceil = ceil;
+						__all__.cos = cos;
+						__all__.cosh = cosh;
+						__all__.degrees = degrees;
+						__all__.e = e;
+						__all__.exp = exp;
+						__all__.expm1 = expm1;
+						__all__.floor = floor;
+						__all__.hypot = hypot;
+						__all__.inf = inf;
+						__all__.isnan = isnan;
+						__all__.log = log;
+						__all__.log10 = log10;
+						__all__.log1p = log1p;
+						__all__.log2 = log2;
+						__all__.nan = nan;
+						__all__.pi = pi;
+						__all__.pow = pow;
+						__all__.radians = radians;
+						__all__.sin = sin;
+						__all__.sinh = sinh;
+						__all__.sqrt = sqrt;
+						__all__.tan = tan;
+						__all__.tanh = tanh;
+						__all__.trunc = trunc;
+					__pragma__ ('</all>')
+				}
+			}
+		}
+	);
+	__nest__ (
+		__all__,
 		'org.threejs', {
 			__all__: {
 				__inited__: false,
@@ -7052,11 +7142,17 @@ function pysteroids () {
 						}
 						return val;
 					};
+					var XWRAP = 0;
+					var XNWRAP = 0;
+					var YWRAP = 0;
+					var YNWRAP = 0;
+					var set_limits = function (x, y) {
+						XWRAP = int (x);
+						XNWRAP = -(1) * XWRAP;
+						YWRAP = int (y);
+						YNWRAP = -(1) * YWRAP;
+					};
 					var wrap = function (obj) {
-						var XWRAP = 70;
-						var XNWRAP = -(70);
-						var YWRAP = 35;
-						var YNWRAP = -(35);
 						var __left0__ = tuple ([obj.position.x, obj.position.y, obj.position.z]);
 						var x = __left0__ [0];
 						var y = __left0__ [1];
@@ -7189,12 +7285,17 @@ function pysteroids () {
 					__pragma__ ('<all>')
 						__all__.AABB = AABB;
 						__all__.FPSCounter = FPSCounter;
+						__all__.XNWRAP = XNWRAP;
+						__all__.XWRAP = XWRAP;
+						__all__.YNWRAP = YNWRAP;
+						__all__.YWRAP = YWRAP;
 						__all__.advance = advance;
 						__all__.clamp = clamp;
 						__all__.coroutine = coroutine;
 						__all__.now = now;
 						__all__.pad_wrap = pad_wrap;
 						__all__.set_element = set_element;
+						__all__.set_limits = set_limits;
 						__all__.sign = sign;
 						__all__.three = three;
 						__all__.timer = timer;
@@ -7731,6 +7832,7 @@ function pysteroids () {
 	(function () {
 		var audio = {};
 		var logging = {};
+		var math = {};
 		var random = {};
 		__nest__ (logging, '', __init__ (__world__.logging));
 		__nest__ (random, '', __init__ (__world__.random));
@@ -7746,6 +7848,8 @@ function pysteroids () {
 		var timer = __init__ (__world__.utils).timer;
 		var coroutine = __init__ (__world__.utils).coroutine;
 		var clamp = __init__ (__world__.utils).clamp;
+		var set_limits = __init__ (__world__.utils).set_limits;
+		__nest__ (math, '', __init__ (__world__.math));
 		__nest__ (audio, '', __init__ (__world__.audio));
 		var DEBUG = true;
 		var logger = logging.getLogger ('root');
@@ -7762,12 +7866,20 @@ function pysteroids () {
 			var args = tuple ([].slice.apply (arguments).slice (0));
 			print ('done at', args [0]);
 		};
+		var hfov = function (vfov, w, h) {
+			return ;
+		};
 		var Graphics = __class__ ('Graphics', [object], {
-			get __init__ () {return __get__ (this, function (self, w, h, canvas) {
+			get __init__ () {return __get__ (this, function (self, w, h, canvas, fov) {
+				if (typeof fov == 'undefined' || (fov != null && fov .hasOwnProperty ("__kwargtrans__"))) {;
+					var fov = 53.13;
+				};
 				self.width = float (w);
 				self.height = float (h);
 				self.scene = three.Scene ();
-				self.camera = three.PerspectiveCamera (53.13, self.width / self.height, 1, 500);
+				self.camera = three.PerspectiveCamera (fov, self.width / self.height, 1, 500);
+				self.vfov = math.radians (fov);
+				self.hfov = 2 * math.atan (math.tan (math.radians (fov) / 2.0) * ((w / h) * 1.0));
 				self.camera.position.set (0, 0, 80);
 				self.camera.lookAt (self.scene.position);
 				self.renderer = three.WebGLRenderer (dict ({'Antialias': true}));
@@ -7779,14 +7891,25 @@ function pysteroids () {
 			});},
 			get add () {return __get__ (this, function (self, item) {
 				self.scene.add (item.geo);
+			});},
+			get extent () {return __get__ (this, function (self) {
+				var v_extent = math.tan (self.vfov / 2.0) * 80;
+				var h_extent = math.tan (self.hfov / 2.0) * 80;
+				return tuple ([h_extent, v_extent]);
 			});}
 		});
 		var Audio = __class__ ('Audio', [object], {
-			get __init__ () {return __get__ (this, function (self) {
-				self.fire_rota = list ([audio.clip ('344276__nsstudios__laser3.wav'), audio.clip ('344276__nsstudios__laser3.wav'), audio.clip ('344276__nsstudios__laser3.wav'), audio.clip ('344276__nsstudios__laser3.wav')]);
-				self.explosion_rota = list ([audio.clip ('108641__juskiddink__nearby-explosion-with-debris.wav'), audio.clip ('108641__juskiddink__nearby-explosion-with-debris.wav'), audio.clip ('108641__juskiddink__nearby-explosion-with-debris.wav'), audio.clip ('108641__juskiddink__nearby-explosion-with-debris.wav')]);
-				self.thrust = audio.loop ('146770__qubodup__rocket-boost-engine-loop.wav');
-				self.fail = audio.clip ('172950__notr__saddertrombones.mp3');
+			get __init__ () {return __get__ (this, function (self, audio_path) {
+				if (typeof audio_path == 'undefined' || (audio_path != null && audio_path .hasOwnProperty ("__kwargtrans__"))) {;
+					var audio_path = '';
+				};
+				var pth = (function __lambda__ (p) {
+					return audio_path + p;
+				});
+				self.fire_rota = list ([audio.clip (pth ('344276__nsstudios__laser3.wav')), audio.clip (pth ('344276__nsstudios__laser3.wav')), audio.clip (pth ('344276__nsstudios__laser3.wav')), audio.clip (pth ('344276__nsstudios__laser3.wav'))]);
+				self.explosion_rota = list ([audio.clip (pth ('108641__juskiddink__nearby-explosion-with-debris.wav')), audio.clip (pth ('108641__juskiddink__nearby-explosion-with-debris.wav')), audio.clip (pth ('108641__juskiddink__nearby-explosion-with-debris.wav')), audio.clip (pth ('108641__juskiddink__nearby-explosion-with-debris.wav'))]);
+				self.thrust = audio.loop (pth ('146770__qubodup__rocket-boost-engine-loop.wav'));
+				self.fail = audio.clip (pth ('172950__notr__saddertrombones.mp3'));
 				self.thrust.play ();
 				self.shoot_ctr = 0;
 				self.explode_ctr = 0;
@@ -7801,9 +7924,19 @@ function pysteroids () {
 			});}
 		});
 		var Game = __class__ ('Game', [object], {
-			get __init__ () {return __get__ (this, function (self, canvas) {
+			get __init__ () {return __get__ (this, function (self, canvas, fullscreen) {
+				if (typeof fullscreen == 'undefined' || (fullscreen != null && fullscreen .hasOwnProperty ("__kwargtrans__"))) {;
+					var fullscreen = true;
+				};
 				self.keyboard = Keyboard ();
-				self.graphics = Graphics (window.innerWidth, window.innerHeight, canvas);
+				if (fullscreen) {
+					self.graphics = Graphics (window.innerWidth, window.innerHeight, canvas);
+				}
+				else {
+					self.graphics = Graphics (canvas.offsetWidth, (3 * canvas.offsetWidth) / 4, canvas);
+				}
+				self.extents = self.graphics.extent ();
+				set_limits (...self.extents);
 				self.create_controls ();
 				self.ship = null;
 				self.bullets = list ([]);
@@ -7816,9 +7949,14 @@ function pysteroids () {
 				self.score = 0;
 				self.score_display = document.getElementById ('score');
 				self.fps_counter = FPSCounter (document.getElementById ('FPS'));
-				var v_center = (window.innerHeight - 120) / 2.0;
+				var v_center = canvas.offsetHeight / 2;
 				var title = document.getElementById ('game_over');
 				title.style.top = v_center;
+				var hud = document.getElementById ('hud');
+				hud.style.width = canvas.offsetWidth;
+				hud.style.height = canvas.offsetHeight;
+				var frame = document.getElementById ('game_frame');
+				frame.style.min_height = canvas.offsetHeight + 64;
 			});},
 			get create_controls () {return __get__ (this, function (self) {
 				self.keyboard.add_handler ('spin', ControlAxis ('ArrowRight', 'ArrowLeft', __kwargtrans__ ({attack: 1, decay: 0.6})));
@@ -7866,8 +8004,8 @@ function pysteroids () {
 			});},
 			get tick () {return __get__ (this, function (self) {
 				if (len (self.asteroids) == 0 || self.lives < 1) {
-					document.getElementById ('game_over').style.zIndex = 10;
-					document.getElementById ('credits').style.zIndex = 10;
+					document.getElementById ('game_over').style.visibility = 'visible';
+					document.getElementById ('credits').style.visibility = 'visible';
 					return ;
 				}
 				requestAnimationFrame (self.tick);
@@ -8003,12 +8141,13 @@ function pysteroids () {
 			});}
 		});
 		var canvas = document.getElementById ('game_canvas');
-		var game = Game (canvas);
+		var game = Game (canvas, true);
 		game.tick ();
 		__pragma__ ('<use>' +
 			'audio' +
 			'controls' +
 			'logging' +
+			'math' +
 			'org.threejs' +
 			'random' +
 			'units' +
@@ -8030,8 +8169,10 @@ function pysteroids () {
 			__all__.coroutine = coroutine;
 			__all__.done = done;
 			__all__.game = game;
+			__all__.hfov = hfov;
 			__all__.logger = logger;
 			__all__.now = now;
+			__all__.set_limits = set_limits;
 			__all__.timer = timer;
 			__all__.waiter = waiter;
 			__all__.wrap = wrap;

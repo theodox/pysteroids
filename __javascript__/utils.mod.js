@@ -14,11 +14,17 @@
 						}
 						return val;
 					};
+					var XWRAP = 0;
+					var XNWRAP = 0;
+					var YWRAP = 0;
+					var YNWRAP = 0;
+					var set_limits = function (x, y) {
+						XWRAP = int (x);
+						XNWRAP = -(1) * XWRAP;
+						YWRAP = int (y);
+						YNWRAP = -(1) * YWRAP;
+					};
 					var wrap = function (obj) {
-						var XWRAP = 70;
-						var XNWRAP = -(70);
-						var YWRAP = 35;
-						var YNWRAP = -(35);
 						var __left0__ = tuple ([obj.position.x, obj.position.y, obj.position.z]);
 						var x = __left0__ [0];
 						var y = __left0__ [1];
@@ -151,12 +157,17 @@
 					__pragma__ ('<all>')
 						__all__.AABB = AABB;
 						__all__.FPSCounter = FPSCounter;
+						__all__.XNWRAP = XNWRAP;
+						__all__.XWRAP = XWRAP;
+						__all__.YNWRAP = YNWRAP;
+						__all__.YWRAP = YWRAP;
 						__all__.advance = advance;
 						__all__.clamp = clamp;
 						__all__.coroutine = coroutine;
 						__all__.now = now;
 						__all__.pad_wrap = pad_wrap;
 						__all__.set_element = set_element;
+						__all__.set_limits = set_limits;
 						__all__.sign = sign;
 						__all__.three = three;
 						__all__.timer = timer;
