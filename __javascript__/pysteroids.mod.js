@@ -118,14 +118,14 @@
 				self.score = 0;
 				self.score_display = document.getElementById ('score');
 				self.fps_counter = FPSCounter (document.getElementById ('FPS'));
-				var v_center = canvas.offsetHeight / 2;
+				var v_center = canvas.offsetHeight / 3;
 				var title = document.getElementById ('game_over');
 				title.style.top = v_center;
 				var hud = document.getElementById ('hud');
 				hud.style.width = canvas.offsetWidth;
 				hud.style.height = canvas.offsetHeight;
 				var frame = document.getElementById ('game_frame');
-				frame.style.min_height = canvas.offsetHeight + 64;
+				frame.style.min_height = canvas.offsetHeight;
 			});},
 			get create_controls () {return __get__ (this, function (self) {
 				self.keyboard.add_handler ('spin', ControlAxis ('ArrowRight', 'ArrowLeft', __kwargtrans__ ({attack: 1, decay: 0.6})));

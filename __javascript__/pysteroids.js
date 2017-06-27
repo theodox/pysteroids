@@ -1,5 +1,5 @@
 "use strict";
-// Transcrypt'ed from Python, 2017-06-21 01:00:08
+// Transcrypt'ed from Python, 2017-06-26 22:48:14
 function pysteroids () {
    var __symbols__ = ['__py3.6__', '__esv6__'];
     var __all__ = {};
@@ -209,7 +209,7 @@ function pysteroids () {
 						get __init__ () {return __get__ (this, function (self) {
 							self.interpreter_name = 'python';
 							self.transpiler_name = 'transcrypt';
-							self.transpiler_version = '3.6.26';
+							self.transpiler_version = '3.6.25';
 							self.target_subdir = '__javascript__';
 						});}
 					});
@@ -7949,14 +7949,14 @@ function pysteroids () {
 				self.score = 0;
 				self.score_display = document.getElementById ('score');
 				self.fps_counter = FPSCounter (document.getElementById ('FPS'));
-				var v_center = canvas.offsetHeight / 2;
+				var v_center = canvas.offsetHeight / 3;
 				var title = document.getElementById ('game_over');
 				title.style.top = v_center;
 				var hud = document.getElementById ('hud');
 				hud.style.width = canvas.offsetWidth;
 				hud.style.height = canvas.offsetHeight;
 				var frame = document.getElementById ('game_frame');
-				frame.style.min_height = canvas.offsetHeight + 64;
+				frame.style.min_height = canvas.offsetHeight;
 			});},
 			get create_controls () {return __get__ (this, function (self) {
 				self.keyboard.add_handler ('spin', ControlAxis ('ArrowRight', 'ArrowLeft', __kwargtrans__ ({attack: 1, decay: 0.6})));
