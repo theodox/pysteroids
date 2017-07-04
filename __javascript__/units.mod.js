@@ -43,14 +43,15 @@
 						get __init__ () {return __get__ (this, function (self, keyboard, game) {
 							Unit.__init__ (self);
 							self.keyboard = keyboard;
-							self.geo = three.Mesh (three.BoxGeometry (2, 3, 2), three.MeshNormalMaterial ());
-							var exhaust = three.Mesh (three.BoxGeometry (1, 2, 1), three.MeshBasicMaterial (dict ({'color': 16776960})));
+							self.geo = three.Mesh (three.ConeBufferGeometry (1, 3, 8), three.MeshNormalMaterial ());
+							var exhaust = three.Mesh (three.ConeBufferGeometry (0.5, 2, 8), three.MeshBasicMaterial (dict ({'color': 16776960})));
 							self.geo.add (exhaust);
 							exhaust.translateY (-(2));
+							exhaust.rotateZ (3.14159);
 							self.exhaust = exhaust;
 							self.momentum = three.Vector3 (0, 0, 0);
 							self.keyboard = keyboard;
-							self.bbox = AABB (2, 2, self.geo.position);
+							self.bbox = AABB (2, 3, self.geo.position);
 							self.game = game;
 						});},
 						get thrust () {return __get__ (this, function (self, amt) {

@@ -1,5 +1,5 @@
 "use strict";
-// Transcrypt'ed from Python, 2017-06-26 22:48:14
+// Transcrypt'ed from Python, 2017-07-03 23:24:23
 function pysteroids () {
    var __symbols__ = ['__py3.6__', '__esv6__'];
     var __all__ = {};
@@ -7030,14 +7030,15 @@ function pysteroids () {
 						get __init__ () {return __get__ (this, function (self, keyboard, game) {
 							Unit.__init__ (self);
 							self.keyboard = keyboard;
-							self.geo = three.Mesh (three.BoxGeometry (2, 3, 2), three.MeshNormalMaterial ());
-							var exhaust = three.Mesh (three.BoxGeometry (1, 2, 1), three.MeshBasicMaterial (dict ({'color': 16776960})));
+							self.geo = three.Mesh (three.ConeBufferGeometry (1, 3, 8), three.MeshNormalMaterial ());
+							var exhaust = three.Mesh (three.ConeBufferGeometry (0.5, 2, 8), three.MeshBasicMaterial (dict ({'color': 16776960})));
 							self.geo.add (exhaust);
 							exhaust.translateY (-(2));
+							exhaust.rotateZ (3.14159);
 							self.exhaust = exhaust;
 							self.momentum = three.Vector3 (0, 0, 0);
 							self.keyboard = keyboard;
-							self.bbox = AABB (2, 2, self.geo.position);
+							self.bbox = AABB (2, 3, self.geo.position);
 							self.game = game;
 						});},
 						get thrust () {return __get__ (this, function (self, amt) {
@@ -7835,7 +7836,9 @@ function pysteroids () {
 		var math = {};
 		var random = {};
 		__nest__ (logging, '', __init__ (__world__.logging));
+		__nest__ (math, '', __init__ (__world__.math));
 		__nest__ (random, '', __init__ (__world__.random));
+		__nest__ (audio, '', __init__ (__world__.audio));
 		var three =  __init__ (__world__.org.threejs);
 		var Keyboard = __init__ (__world__.controls).Keyboard;
 		var ControlAxis = __init__ (__world__.controls).ControlAxis;
@@ -7845,12 +7848,9 @@ function pysteroids () {
 		var wrap = __init__ (__world__.utils).wrap;
 		var now = __init__ (__world__.utils).now;
 		var FPSCounter = __init__ (__world__.utils).FPSCounter;
-		var timer = __init__ (__world__.utils).timer;
 		var coroutine = __init__ (__world__.utils).coroutine;
 		var clamp = __init__ (__world__.utils).clamp;
 		var set_limits = __init__ (__world__.utils).set_limits;
-		__nest__ (math, '', __init__ (__world__.math));
-		__nest__ (audio, '', __init__ (__world__.audio));
 		var DEBUG = true;
 		var logger = logging.getLogger ('root');
 		logger.addHandler (logging.StreamHandler ());
@@ -7941,11 +7941,12 @@ function pysteroids () {
 				self.ship = null;
 				self.bullets = list ([]);
 				self.asteroids = list ([]);
+				self.helptext = null;
+				self.resetter = null;
 				self.setup ();
 				self.last_frame = now ();
 				self.audio = Audio ();
 				self.lives = 3;
-				self.resetter = null;
 				self.score = 0;
 				self.score_display = document.getElementById ('score');
 				self.fps_counter = FPSCounter (document.getElementById ('FPS'));
@@ -8001,11 +8002,13 @@ function pysteroids () {
 					self.graphics.add (bullet);
 					self.bullets.append (bullet);
 				}
+				self.helptext = self.help_display ();
 			});},
 			get tick () {return __get__ (this, function (self) {
 				if (len (self.asteroids) == 0 || self.lives < 1) {
 					document.getElementById ('game_over').style.visibility = 'visible';
 					document.getElementById ('credits').style.visibility = 'visible';
+					document.getElementById ('game_canvas').style.cursor = 'auto';
 					return ;
 				}
 				requestAnimationFrame (self.tick);
@@ -8075,6 +8078,9 @@ function pysteroids () {
 				if (self.resetter !== null) {
 					self.resetter.advance (t);
 				}
+				if (self.helptext !== null) {
+					self.helptext.advance (t);
+				}
 				self.graphics.render ();
 				self.last_frame = now ();
 			});},
@@ -8134,6 +8140,34 @@ function pysteroids () {
 				py_next (reset);
 				return reset;
 			});},
+			get help_display () {return __get__ (this, function (self) {
+				var messages = 3;
+				var repeats = 2;
+				var elapsed = 0;
+				var count = 0;
+				var period = 2.25;
+				var display_stuff = function (t) {
+					if (count < messages * repeats) {
+						elapsed += t / period;
+						count = int (elapsed);
+						var lintime = __mod__ (elapsed, 1);
+						var opacity = math.pow (math.sin (lintime * 3.1415), 2);
+						logger.info (lintime);
+						document.getElementById ('instructions{}'.format (__mod__ (count, 3))).style.opacity = opacity;
+						return tuple ([true, opacity]);
+					}
+					else {
+						return tuple ([false, 'OK']);
+					}
+				};
+				var done = function () {
+					document.getElementById ('instructions1').style.visiblity = 'hidden';
+				};
+				var displayer = coroutine (display_stuff, done);
+				py_next (displayer);
+				logger.debug ('displayer', displayer);
+				return displayer;
+			});},
 			get update_score () {return __get__ (this, function (self, score) {
 				self.score += score;
 				self.score_display.innerHTML = self.score;
@@ -8173,7 +8207,6 @@ function pysteroids () {
 			__all__.logger = logger;
 			__all__.now = now;
 			__all__.set_limits = set_limits;
-			__all__.timer = timer;
 			__all__.waiter = waiter;
 			__all__.wrap = wrap;
 		__pragma__ ('</all>')

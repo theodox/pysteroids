@@ -1,13 +1,12 @@
 import logging
+import math
 import random
 
+import audio
 import org.threejs as three
 from controls import Keyboard, ControlAxis
 from units import Ship, Asteroid, Bullet
-from utils import wrap, now, FPSCounter, timer, coroutine, clamp, set_limits
-import math
-import audio
-from org.transcrypt.stubs.browser import __pragma__
+from utils import wrap, now, FPSCounter, coroutine, clamp, set_limits
 
 DEBUG = True
 logger = logging.getLogger('root')
@@ -30,21 +29,21 @@ def hfov(vfov, w, h):
     """gives horizontal fov (in rads) for given vertical fov (in rads) and aspect ratio"""
     return
 
+
 class Graphics:
-    def __init__(self, w, h, canvas, fov = 53.13):
+    def __init__(self, w, h, canvas, fov=53.13):
         self.width = float(w)
         self.height = float(h)
         self.scene = three.Scene()
         self.camera = three.PerspectiveCamera(fov, self.width / self.height, 1, 500)
         self.vfov = math.radians(fov)
-        self.hfov = 2 * math.atan (math.tan( math.radians(fov) / 2.0 ) * (w / h * 1.0))
+        self.hfov = 2 * math.atan(math.tan(math.radians(fov) / 2.0) * (w / h * 1.0))
 
         self.camera.position.set(0, 0, 80)
         self.camera.lookAt(self.scene.position)
         self.renderer = three.WebGLRenderer({'Antialias': True})
         self.renderer.setSize(self.width, self.height)
         canvas.appendChild(self.renderer.domElement)
-
 
     def render(self):
         self.renderer.render(self.scene, self.camera)
@@ -59,7 +58,7 @@ class Graphics:
 
 
 class Audio:
-    def __init__(self, audio_path = ""):
+    def __init__(self, audio_path=""):
         pth = lambda p: audio_path + p
 
         self.fire_rota = [audio.clip(pth('344276__nsstudios__laser3.wav')),
@@ -69,7 +68,7 @@ class Audio:
         self.explosion_rota = [audio.clip(pth('108641__juskiddink__nearby-explosion-with-debris.wav')),
                                audio.clip(pth('108641__juskiddink__nearby-explosion-with-debris.wav')),
                                audio.clip(pth('108641__juskiddink__nearby-explosion-with-debris.wav')),
-                               audio.clip(pth('108641__juskiddink__nearby-explosion-with-debris.wav')) ]
+                               audio.clip(pth('108641__juskiddink__nearby-explosion-with-debris.wav'))]
         self.thrust = audio.loop(pth('146770__qubodup__rocket-boost-engine-loop.wav'))
         self.fail = audio.clip(pth('172950__notr__saddertrombones.mp3'))
         self.thrust.play()
@@ -91,23 +90,23 @@ class Game:
         if fullscreen:
             self.graphics = Graphics(window.innerWidth, window.innerHeight, canvas)
         else:
-            self.graphics = Graphics(canvas.offsetWidth, (3  * canvas.offsetWidth) / 4, canvas )
+            self.graphics = Graphics(canvas.offsetWidth, (3 * canvas.offsetWidth) / 4, canvas)
 
         self.extents = self.graphics.extent()
-        set_limits (*self.extents)
+        set_limits(*self.extents)
         self.create_controls()
         self.ship = None
         self.bullets = []
         self.asteroids = []
+        self.helptext = None
+        self.resetter = None
         self.setup()
         self.last_frame = now()
         self.audio = Audio()
         self.lives = 3
-        self.resetter = None
         self.score = 0
         self.score_display = document.getElementById('score')
         self.fps_counter = FPSCounter(document.getElementById("FPS"))
-
 
         # adjust the position of the game over div
         v_center = canvas.offsetHeight / 3
@@ -130,6 +129,7 @@ class Game:
         def suppress_scroll(e):
             if e.keyCode in [32, 37, 38, 39, 40]:
                 e.preventDefault()
+
         window.addEventListener("keydown", suppress_scroll, False)
 
     def setup(self):
@@ -166,11 +166,14 @@ class Game:
             self.graphics.add(bullet)
             self.bullets.append(bullet)
 
+        self.helptext = self.help_display()
+
     def tick(self):
 
         if len(self.asteroids) == 0 or self.lives < 1:
             document.getElementById("game_over").style.visibility = 'visible'
             document.getElementById('credits').style.visibility = 'visible'
+            document.getElementById('game_canvas').style.cursor = 'auto'
             return
 
         requestAnimationFrame(self.tick)
@@ -201,7 +204,7 @@ class Game:
                     d = a.geo.position.distanceTo(self.ship.position)
                     if d < (a.radius + 0.5):
                         self.resetter = self.kill()
-                        print ("!!", self.resetter)
+                        print("!!", self.resetter)
                         dead.append(a)
         else:
             self.resetter.advance(t)
@@ -234,8 +237,12 @@ class Game:
             item.update(t)
             wrap(item.geo)
 
+        # advance coroutines
         if self.resetter is not None:
             self.resetter.advance(t)
+
+        if self.helptext is not None:
+            self.helptext.advance(t)
 
         self.graphics.render()
         self.last_frame = now()
@@ -295,6 +302,42 @@ class Game:
         next(reset)
         return reset
 
+    def help_display(self):
+
+        """
+        cycle through the help messages, fading in and out
+        """
+
+        messages = 3
+        repeats = 2
+        elapsed = 0
+        count = 0
+        period = 2.25
+        def display_stuff(t):
+            nonlocal elapsed, count, messages, repeats
+            if count < messages * repeats:
+                elapsed += t / period
+                count = int(elapsed)
+                lintime = elapsed % 1
+                opacity = math.pow(math.sin(lintime * 3.1415), 2)
+                logger.info(lintime)
+                document.getElementById("instructions{}".format(count % 3)).style.opacity = opacity
+
+                return True, opacity
+            else:
+                return False, "OK"
+
+        def done():
+             document.getElementById("instructions1").style.visiblity = 'hidden'
+
+        displayer = coroutine(display_stuff, done)
+
+        next(displayer)
+        logger.debug("displayer", displayer)
+        return displayer
+
+
+
     def update_score(self, score):
         self.score += score
         self.score_display.innerHTML = self.score
@@ -304,6 +347,4 @@ class Game:
 canvas = document.getElementById("game_canvas")
 game = Game(canvas, True)
 
-
 game.tick()
-
